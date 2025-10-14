@@ -1,44 +1,29 @@
 from app.services.uniprot_source import UniProtSource
 from app.services.ncbi_source import NcbiSource
+from app.models.gene_response import GeneResponse
 
 class KnowledgeBaseFacade:
     def __init__(self):
-        self.sources = [UniProtSource(), NcbiSource()]
+        self.uniprot = UniProtSource()
+        self.ncbi = NcbiSource()
 
-    def search(self, gene_symbol: str) -> dict:
+    def search(self, gene_symbol: str) -> GeneResponse:
         gene_symbol = gene_symbol.strip()
-        results = []
-        for s in self.sources:
-            try:
-                results.append(s.fetch(gene_symbol))
-            except Exception as e:
-                print(f"Warning: source {s.__class__.__name__} failed: {e}")
-        aggregated = self.aggregate(results, gene_symbol)
-        return aggregated
+        u = self.uniprot.fetch(gene_symbol)
+        n = self.ncbi.fetch(gene_symbol)
 
-    def aggregate(self, results, gene_symbol):
-        seq = None
-        functions = []
-        mutations = []
-        seen = set()
-        for r in results:
-            if not seq and getattr(r, 'sequence', None):
-                seq = r.sequence
-            if getattr(r, 'functions', None):
-                for f in r.functions:
-                    if f not in functions:
-                        functions.append(f)
-            if getattr(r, 'mutations', None):
-                for m in r.mutations:
-                    key = (m.name, m.position)
-                    if key not in seen:
-                        seen.add(key)
-                        mutations.append({'name': m.name, 'position': m.position, 'effect': m.effect, 'reference': m.reference})
-        payload = {
-            'gene_symbol': gene_symbol,
-            'sequence': seq,
-            'functions': functions,
-            'mutations': mutations,
-            'sources_count': len(results)
-        }
-        return payload
+        resp = GeneResponse(
+            gene=gene_symbol.upper(),
+            function=u.get('function'),
+            synonyms=u.get('synonyms') or [],
+            longevity_association=n.get('longevity_association'),
+            modification_effects=u.get('modification_effects'),
+            dna_sequence=n.get('dna_sequence'),
+            interval_in_dna_sequence=n.get('interval_in_dna_sequence'),
+            protein_sequence=u.get('protein_sequence'),
+            interval_in_protein_sequence=None,
+            interval_in_sequence=None,
+            contribution_of_evolution=u.get('contribution_of_evolution'),
+            article=n.get('article') or u.get('article')
+        )
+        return resp

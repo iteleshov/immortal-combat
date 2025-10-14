@@ -1,14 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from app.services.knowledge_facade import KnowledgeBaseFacade
+from app.models.gene_response import GeneResponse
 
-app = FastAPI(title="Longevity Gene Knowledge API (Aggregated)")
+app = FastAPI(title="Longevity Gene Knowledge API (UniProt + NCBI)")
 facade = KnowledgeBaseFacade()
 
-@app.get("/search")
+@app.get('/search', response_model=GeneResponse)
 def search_gene(gene_name: str):
-    """Return aggregated gene information from multiple sources (UniProt + NCBI)."""
     try:
-        result = facade.search(gene_name)
-        return result
+        return facade.search(gene_name)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,48 +1,55 @@
 from app.services.http_client import HttpClient
-from app.models.gene_info import GeneInfo, MutationInfo
 
 class UniProtSource:
-    BASE = "https://rest.uniprot.org/uniprotkb/search"
+    SEARCH_URL = 'https://rest.uniprot.org/uniprotkb/search'
+    ENTRY_URL = 'https://rest.uniprot.org/uniprotkb/{}.json'
 
     def __init__(self):
         self.client = HttpClient()
 
-    def fetch(self, gene_symbol: str) -> GeneInfo:
-        params = {"query": f"gene:{gene_symbol} AND organism_id:9606", "format": "json", "size": 1}
-        res = self.client.get_json(self.BASE, params=params)
-
-        sequence = None
-        functions = []
-        mutations = []
-        try:
-            hits = res.get('results', [])
-            if hits:
-                entry = hits[0]
-                accession = entry.get('primaryAccession') or entry.get('uniProtkbId')
-                if accession:
-                    entry_url = f"https://rest.uniprot.org/uniprotkb/{accession}.json"
-                    full = self.client.get_json(entry_url)
-                    seq_obj = full.get('sequence') or {}
-                    sequence = seq_obj.get('value')
-                    comments = full.get('comments') or []
-                    for c in comments:
-                        if c.get('commentType') == 'FUNCTION':
-                            txt = ' '.join([t.get('value','') for t in c.get('texts', [])])
-                            functions.append(txt)
-                    for feat in full.get('features', []):
-                        if feat.get('type') in ('VARIANT','MODIFICATION'):
-                            name = feat.get('description') or feat.get('variation') or feat.get('type')
-                            pos = None
-                            loc = feat.get('location', {})
-                            if loc:
-                                begin = loc.get('start', {}).get('value') if isinstance(loc.get('start'), dict) else None
-                                if begin:
-                                    try:
-                                        pos = int(begin)
-                                    except:
-                                        pos = None
-                            mutations.append(MutationInfo(name=name, position=pos, effect=None, reference=None))
-        except Exception:
-            pass
-
-        return GeneInfo(source='UniProt', gene_symbol=gene_symbol, sequence=sequence, functions=functions, mutations=mutations)
+    def fetch(self, gene_symbol: str) -> dict:
+        params = {'query': f'gene:{gene_symbol} AND organism_id:9606', 'format': 'json', 'size': 1}
+        res = self.client.get(self.SEARCH_URL, params=params)
+        out = {'protein_sequence': None, 'function': None, 'synonyms': [], 'modification_effects': None, 'article': None, 'contribution_of_evolution': None}
+        hits = res.get('results', []) if isinstance(res, dict) else []
+        if not hits:
+            return out
+        entry = hits[0]
+        accession = entry.get('primaryAccession') or entry.get('uniProtkbId')
+        if not accession:
+            return out
+        full = self.client.get(self.ENTRY_URL.format(accession))
+        seq_obj = full.get('sequence') or {}
+        out['protein_sequence'] = seq_obj.get('value')
+        comments = full.get('comments', [])
+        fn_texts = []
+        for c in comments:
+            if c.get('commentType') == 'FUNCTION':
+                texts = c.get('texts', [])
+                fn_texts.append(' '.join([t.get('value','') for t in texts]))
+            if c.get('commentType') == 'SEQUENCE CAUTION' and not out['modification_effects']:
+                out['modification_effects'] = ' '.join([t.get('value','') for t in c.get('texts', [])])
+        if fn_texts:
+            out['function'] = '\n'.join(fn_texts)
+        genes = full.get('genes', [])
+        syns = []
+        if genes:
+            for g in genes:
+                for s in g.get('synonyms', []):
+                    v = s.get('value')
+                    if v and v not in syns:
+                        syns.append(v)
+        out['synonyms'] = syns
+        refs = full.get('references', [])
+        doi = None
+        for r in refs:
+            pub = r.get('citation', {})
+            doi = pub.get('doi') or doi
+            if doi:
+                break
+        if doi:
+            out['article'] = doi
+        for c in comments:
+            if c.get('commentType') and 'EVOLUTION' in c.get('commentType','').upper():
+                out['contribution_of_evolution'] = ' '.join([t.get('value','') for t in c.get('texts', [])])
+        return out
