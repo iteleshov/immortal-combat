@@ -16,7 +16,7 @@ import os
 
 # configuration
 os.environ['NEBIUS_API_KEY'] = open('secret.txt', 'r').read().strip()
-def set_server(server_name="loving_tu"):
+def set_server(server_name="youthful_ride"):
     server = StdioServerParameters(
         command="docker",
         args=["exec", "-i", server_name, "node", "/app/build/index.js"]
@@ -24,63 +24,18 @@ def set_server(server_name="loving_tu"):
     return server
 
 def set_model(
-        api_key=None,
+        api_key=os.environ["NEBIUS_API_KEY"],
         api_base="https://api.studio.nebius.com/v1/",
         temperature=0,
         model_name="Qwen/Qwen3-235B-A22B-Instruct-2507"
 ):
-    if api_key is None:
-        api_key = os.getenv("NEBIUS_API_KEY")
-    print("🚀 Using Nebius API key:", api_key)
-    return OpenAIServerModel(
+    model = OpenAIServerModel(
         model_id=model_name,
         api_key=api_key,
         api_base=api_base,
         temperature=temperature,
     )
-
-class AIUniProtSource:
-    def __init__(self, docker_container="loving_tu"):
-        self.server = StdioServerParameters(
-            command="docker",
-            args=["exec", "-i", docker_container, "node", "/app/build/index.js"]
-        )
-        api_key_path = os.getenv("NEBIUS_API_KEY_PATH", "secret.txt")
-        self.api_key = open(api_key_path, "r").read().strip()
-
-        self.model = OpenAIServerModel(
-            model_id="Qwen/Qwen3-235B-A22B-Instruct-2507",
-            api_key=self.api_key,
-            api_base="https://api.studio.nebius.com/v1/",
-            temperature=0,
-        )
-
-    def _system_prompt(self):
-        return """(insert here SYSTEM_PROMPT from the code)"""
-
-    def _user_prompt(self, protein):
-        return f"""Return the data for the human protein: {protein} ... (short prompt)"""
-
-    def query(self, gene_name: str) -> str:
-        """
-        Return full text report for protein (Markdown or text view)
-        """
-        system_prompt = SYSTEM_PROMPT
-        user_prompt = set_user_prompt(gene_name)
-        with ToolCollection.from_mcp(
-                server_parameters=self.server,
-                trust_remote_code=True,
-                structured_output=False
-        ) as tools:
-            agent = ToolCallingAgent(
-                model=self.model,
-                tools=[*tools.tools],
-                add_base_tools=False,
-                max_steps=3,
-            )
-            agent.prompt_templates["system_prompt"] = self._system_prompt()
-            result = agent.run(self._user_prompt(gene_name))
-            return result
+    return model
 
 
 SYSTEM_PROMPT = """
@@ -265,18 +220,18 @@ Stick to the following schema:
 """
 
 def run_query(
-    gene,
-    server=set_server(),
-    model=set_model(),
-    trust_remote_code=True,
-    structured_output=False
+        gene,
+        server=set_server(),
+        model=set_model(),
+        trust_remote_code=True,
+        structured_output=False
 ):
     system_prompt = SYSTEM_PROMPT
     user_prompt = set_user_prompt(gene)
     with ToolCollection.from_mcp(
-        server_parameters=server,
-        trust_remote_code=trust_remote_code,
-        structured_output=structured_output
+            server_parameters=server,
+            trust_remote_code=trust_remote_code,
+            structured_output=structured_output
     ) as tools:
         agent = ToolCallingAgent(
             model=model,
