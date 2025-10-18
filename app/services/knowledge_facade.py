@@ -13,6 +13,8 @@ class KnowledgeBaseFacade:
         u = self.uniprot.fetch(gene_symbol)
         n = self.ncbi.fetch(gene_symbol)
         mcp_uniprot = run_query(gene_symbol)
+        print("result mcp_uniprot")
+        print(mcp_uniprot)
 
         resp = GeneResponse(
             gene=gene_symbol.upper(),
@@ -23,9 +25,9 @@ class KnowledgeBaseFacade:
             dna_sequence=n.get('dna_sequence'),
             interval_in_dna_sequence=n.get('interval_in_dna_sequence'),
             protein_sequence=u.get('protein_sequence'),
-            interval_in_protein_sequence=mcp_uniprot.get('interval_in_protein_sequence'),
-            interval_in_sequence=mcp_uniprot.get('interval_in_sequence'),
-            contribution_of_evolution=mcp_uniprot.get('contribution_of_evolution'),
+            # interval_in_protein_sequence=mcp_uniprot.get('interval_in_protein_sequence'),
+            # interval_in_sequence=mcp_uniprot.get('interval_in_sequence'),
+            # contribution_of_evolution=mcp_uniprot.get('contribution_of_evolution'),
             article=n.get('article') or u.get('article')
         )
         return resp
