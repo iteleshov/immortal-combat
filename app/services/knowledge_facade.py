@@ -1,4 +1,4 @@
-from app.services.mcp_uniprot_source.uniprot import AIUniProtSource
+from app.services.mcp_uniprot_source.uniprot import run_query
 from app.services.uniprot_source import UniProtSource
 from app.services.ncbi_source import NcbiSource
 from app.models.gene_response import GeneResponse
@@ -7,13 +7,12 @@ class KnowledgeBaseFacade:
     def __init__(self):
         self.uniprot = UniProtSource()
         self.ncbi = NcbiSource()
-        self.mcpUniprot = AIUniProtSource()
 
     def search(self, gene_symbol: str) -> GeneResponse:
         gene_symbol = gene_symbol.strip()
         u = self.uniprot.fetch(gene_symbol)
         n = self.ncbi.fetch(gene_symbol)
-        mcp_uniprot = self.mcpUniprot.query(gene_symbol)
+        mcp_uniprot = run_query(gene_symbol)
 
         resp = GeneResponse(
             gene=gene_symbol.upper(),

@@ -16,7 +16,7 @@ import os
 
 # configuration
 os.environ['NEBIUS_API_KEY'] = open('secret.txt', 'r').read().strip()
-def set_server(server_name="youthful_ride"):
+def set_server(server_name="loving_tu"):
     server = StdioServerParameters(
         command="docker",
         args=["exec", "-i", server_name, "node", "/app/build/index.js"]
@@ -24,18 +24,20 @@ def set_server(server_name="youthful_ride"):
     return server
 
 def set_model(
-        api_key=os.environ["NEBIUS_API_KEY"],
+        api_key=None,
         api_base="https://api.studio.nebius.com/v1/",
         temperature=0,
         model_name="Qwen/Qwen3-235B-A22B-Instruct-2507"
 ):
-    model = OpenAIServerModel(
+    if api_key is None:
+        api_key = os.getenv("NEBIUS_API_KEY")
+    print("🚀 Using Nebius API key:", api_key)
+    return OpenAIServerModel(
         model_id=model_name,
         api_key=api_key,
         api_base=api_base,
         temperature=temperature,
     )
-    return model
 
 class AIUniProtSource:
     def __init__(self, docker_container="loving_tu"):
@@ -63,6 +65,8 @@ class AIUniProtSource:
         """
         Return full text report for protein (Markdown or text view)
         """
+        system_prompt = SYSTEM_PROMPT
+        user_prompt = set_user_prompt(gene_name)
         with ToolCollection.from_mcp(
                 server_parameters=self.server,
                 trust_remote_code=True,
