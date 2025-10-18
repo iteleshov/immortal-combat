@@ -23,13 +23,12 @@ def set_server(server_name="youthful_ride"):
     )
     return server
 
-
 def set_model(
-    api_key=os.environ["NEBIUS_API_KEY"], 
-    api_base="https://api.studio.nebius.com/v1/", 
-    temperature=0,
-    model_name="Qwen/Qwen3-235B-A22B-Instruct-2507"
-): 
+        api_key=os.environ["NEBIUS_API_KEY"],
+        api_base="https://api.studio.nebius.com/v1/",
+        temperature=0,
+        model_name="Qwen/Qwen3-235B-A22B-Instruct-2507"
+):
     model = OpenAIServerModel(
         model_id=model_name,
         api_key=api_key,
@@ -37,6 +36,47 @@ def set_model(
         temperature=temperature,
     )
     return model
+
+class AIUniProtSource:
+    def __init__(self, docker_container="loving_tu"):
+        self.server = StdioServerParameters(
+            command="docker",
+            args=["exec", "-i", docker_container, "node", "/app/build/index.js"]
+        )
+        api_key_path = os.getenv("NEBIUS_API_KEY_PATH", "secret.txt")
+        self.api_key = open(api_key_path, "r").read().strip()
+
+        self.model = OpenAIServerModel(
+            model_id="Qwen/Qwen3-235B-A22B-Instruct-2507",
+            api_key=self.api_key,
+            api_base="https://api.studio.nebius.com/v1/",
+            temperature=0,
+        )
+
+    def _system_prompt(self):
+        return """(insert here SYSTEM_PROMPT from the code)"""
+
+    def _user_prompt(self, protein):
+        return f"""Return the data for the human protein: {protein} ... (short prompt)"""
+
+    def query(self, gene_name: str) -> str:
+        """
+        Return full text report for protein (Markdown or text view)
+        """
+        with ToolCollection.from_mcp(
+                server_parameters=self.server,
+                trust_remote_code=True,
+                structured_output=False
+        ) as tools:
+            agent = ToolCallingAgent(
+                model=self.model,
+                tools=[*tools.tools],
+                add_base_tools=False,
+                max_steps=3,
+            )
+            agent.prompt_templates["system_prompt"] = self._system_prompt()
+            result = agent.run(self._user_prompt(gene_name))
+            return result
 
 
 SYSTEM_PROMPT = """
@@ -222,9 +262,9 @@ Stick to the following schema:
 
 def run_query(
     gene,
-    server=set_server(), 
-    model=set_model(), 
-    trust_remote_code=True, 
+    server=set_server(),
+    model=set_model(),
+    trust_remote_code=True,
     structured_output=False
 ):
     system_prompt = SYSTEM_PROMPT
@@ -242,5 +282,5 @@ def run_query(
         )
         agent.prompt_templates["system_prompt"] = system_prompt
         result = agent.run(user_prompt)
-    
+
     return result
