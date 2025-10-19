@@ -1,0 +1,45 @@
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
+@import "tailwindcss";
+
+@theme {
+  --color-background-default: #f0f0f0;
+  --color-text-primary: #333333;
+}
+
+:root {
+  --background-default: theme('colors.background-default');
+  --text-primary: theme('colors.text-primary');
+}
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    /* literal values taken from tailwind.config.js */
+    background-color: #f8fafc; /* secondary.50 */
+    color: #0f172a; /* secondary.900 */
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Example usage */
+.custom-theme {
+  background-color: var(--color-background-default);
+  color: var(--color-text-primary);
+}
+
+
