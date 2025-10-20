@@ -15,7 +15,6 @@ import os
 
 
 # configuration
-os.environ['NEBIUS_API_KEY'] = open('secret.txt', 'r').read().strip()
 def set_server(server_name="youthful_ride"):
     server = StdioServerParameters(
         command="docker",

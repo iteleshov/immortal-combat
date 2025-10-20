@@ -78,7 +78,6 @@ class ReadScholarlyByDOI(Tool):
 
 
 # configuration
-os.environ['NEBIUS_API_KEY'] = open('secret.txt', 'r').read().strip()
 def set_server():
     server = StdioServerParameters(
         command="uvx",
@@ -87,11 +86,11 @@ def set_server():
     return server
 
 def set_model(
-    api_key=os.environ["NEBIUS_API_KEY"], 
-    api_base="https://api.studio.nebius.com/v1/", 
+    api_key=os.environ["NEBIUS_API_KEY"],
+    api_base="https://api.studio.nebius.com/v1/",
     temperature=0,
     model_name="Qwen/Qwen3-235B-A22B-Instruct-2507"
-): 
+):
     model = OpenAIServerModel(
         model_id=model_name,
         api_key=api_key,
@@ -151,8 +150,8 @@ def set_user_prompt_fetch(link, gene):
 
 def run_query(
     gene,
-    model=set_model(), 
-    trust_remote_code=True, 
+    model=set_model(),
+    trust_remote_code=True,
     structured_output=False
 ):
     system_prompt = SYSTEM_PROMPT
@@ -165,7 +164,7 @@ def run_query(
         command="npx",
         args=["-y", "@just-every/mcp-read-website-fast"]
     )
-    
+
     with ToolCollection.from_mcp(
         server_parameters=server_opengenes,
         trust_remote_code=trust_remote_code,
@@ -217,6 +216,6 @@ def run_query(
             for item in json.loads(links)['links']:
                 link = item['link']
                 web_array.append(agent.run(set_user_prompt_fetch(link, gene)))
-    
+
     return opengenes_text, web_array
 

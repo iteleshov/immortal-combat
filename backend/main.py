@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
-from app.services.knowledge_facade import KnowledgeBaseFacade
-from app.models.gene_response import GeneResponse
+from backend.services.knowledge_facade import KnowledgeBaseFacade
+from backend.models.gene_response import GeneResponse
 
 app = FastAPI(title="Longevity Gene Knowledge API (UniProt + NCBI)")
 facade = KnowledgeBaseFacade()
