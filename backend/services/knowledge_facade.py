@@ -1,7 +1,7 @@
-from app.services.mcp_uniprot_source.uniprot import run_query
-from app.services.uniprot_source import UniProtSource
-from app.services.ncbi_source import NcbiSource
-from app.models.gene_response import GeneResponse
+from backend.services.mcp_uniprot_source.uniprot import run_query
+from backend.services.uniprot_source import UniProtSource
+from backend.services.ncbi_source import NcbiSource
+from backend.models.gene_response import GeneResponse
 
 class KnowledgeBaseFacade:
     def __init__(self):

@@ -1,4 +1,4 @@
-from app.services.http_client import HttpClient
+from backend.services.http_client import HttpClient
 
 class UniProtSource:
     SEARCH_URL = 'https://rest.uniprot.org/uniprotkb/search'

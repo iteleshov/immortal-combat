@@ -1,4 +1,4 @@
-from app.services.http_client import HttpClient
+from backend.services.http_client import HttpClient
 
 class NcbiSource:
     ESEARCH = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi'
