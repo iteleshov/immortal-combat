@@ -2,5 +2,6 @@ fastapi
 uvicorn
 requests
 python-dotenv
-smolagents
+smolagents[openai]
+smolagents[mcp]
 git+https://github.com/modelcontextprotocol/python-sdk.git

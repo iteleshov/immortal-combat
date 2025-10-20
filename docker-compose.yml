@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  app:
+    build: .
+    container_name: app
+    restart: unless-stopped
+    volumes:
+      - .:/usr/src/immortal-combat
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8000:8000"
+#    depends_on:
+#      - uniprot_mcp
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+#  uniprot_mcp:
+#    image: ghcr.io/mcp/uniprot-mcp:latest
+#    container_name: uniprot_mcp
+#    restart: unless-stopped
