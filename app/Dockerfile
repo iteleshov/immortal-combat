@@ -14,7 +14,7 @@ COPY ../requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . ./app
+COPY . .
 
 ENV PYTHONPATH="/usr/src/immortal-combat:${PYTHONPATH}"
 
