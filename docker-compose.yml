@@ -1,10 +1,11 @@
 services:
   app:
-    build: .
-    container_name: app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
     restart: unless-stopped
     volumes:
-      - .:/usr/src/immortal-combat
+      - ./app:/usr/src/immortal-combat/app
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8000:8000"

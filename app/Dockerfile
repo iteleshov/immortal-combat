@@ -12,12 +12,13 @@ RUN apt-get update && apt-get install -y docker-cli && \
 
 COPY ../requirements.txt .
 
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY . ./app
+
+ENV PYTHONPATH="/usr/src/immortal-combat:${PYTHONPATH}"
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # Open port FastAPI
 EXPOSE 8000
-
-# Run uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
