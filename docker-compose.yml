@@ -1,5 +1,5 @@
 services:
-  app:
+  immortal-combat-app:
     build:
       context: ./app
       dockerfile: Dockerfile
@@ -13,7 +13,7 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
-  client:
+  immortal-combat-client:
     build:
       context: ./client
       dockerfile: Dockerfile
@@ -21,4 +21,4 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - app
+      - immortal-combat-app
