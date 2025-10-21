@@ -18,7 +18,7 @@ COPY . .
 
 ENV PYTHONPATH="/usr/src/immortal-combat:${PYTHONPATH}"
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # Open port FastAPI
 EXPOSE 8000
