@@ -1,8 +1,6 @@
 services:
   immortal-combat-app:
-    build:
-      context: ./app
-      dockerfile: Dockerfile
+    build: .
     restart: unless-stopped
     volumes:
       - ./app:/usr/src/immortal-combat/app
