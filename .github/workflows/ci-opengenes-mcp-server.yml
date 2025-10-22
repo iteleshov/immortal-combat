@@ -52,3 +52,13 @@ jobs:
         run: |
           ssh ubuntu@$SERVER "timeout 10s docker compose logs opengenes-mcp-server -f | grep -q \"Starting MCP server 'OpenGenes MCP\""
 
+      - name: Verify opengenes-mcp-server is running
+        run: |
+          ssh ubuntu@$SERVER "
+            if docker ps --filter 'name=opengenes-mcp-server' --filter 'status=running' --format '{{.Names}}' | grep -q 'kegg-mcp-server'; then
+              echo 'opengenes-mcp-server is running'
+            else
+              echo 'opengenes-mcp-server is NOT running'
+              exit 1
+            fi
+          "
