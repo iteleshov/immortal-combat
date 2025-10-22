@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, FileText } from 'lucide-react'
+import { ChevronDown, ChevronRight, ExternalLink, FileText } from 'lucide-react'
 import { GeneResponse } from '../types'
-import { exportToJSON } from '../services/export'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
@@ -21,10 +20,6 @@ export default function GeneResults({ gene }: GeneResultsProps) {
       newExpanded.add(section)
     }
     setExpandedSections(newExpanded)
-  }
-
-  const handleExportJSON = () => {
-    exportToJSON(gene, `${gene.gene}_data`)
   }
 
   const SectionHeader = ({
@@ -225,6 +220,26 @@ export default function GeneResults({ gene }: GeneResultsProps) {
           </div>
         )}
       </div>
+    </div>
+    {/* Source */}
+    {gene.externalLink && (
+      <div>
+        <SectionHeader title="Source" section="source" />
+        {expandedSections.has('source') && (
+          <div className="p-6">
+            <a
+              href={gene.externalLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-sm text-primary-600 hover:text-primary-800"
+            >
+              View source article
+              <ExternalLink className="ml-1 h-4 w-4" />
+            </a>
+          </div>
+        )}
+      </div>
+    )}
     </div>
   )
 }

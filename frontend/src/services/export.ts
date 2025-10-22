@@ -1,19 +1,6 @@
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
-import { GeneResponse, ComparisonResponse } from '../types'
-
-export const exportToJSON = (data: GeneResponse | ComparisonResponse, filename: string) => {
-  const jsonString = JSON.stringify(data, null, 2)
-  const blob = new Blob([jsonString], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `${filename}.json`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
-}
+import { GeneResponse } from '../types'
 
 export const exportToPDF = async (elementId: string, filename: string) => {
   const element = document.getElementById(elementId)
