@@ -50,4 +50,5 @@ jobs:
 
       - name: Verify opengenes-mcp-server startup after deployment
         run: |
-          ssh ubuntu@$SERVER "timeout 10s docker compose logs uniprot-mcp-server -f | grep -q \"  Starting MCP server 'OpenGenes MCP'\""
+          ssh ubuntu@$SERVER "timeout 10s docker compose logs opengenes-mcp-server -f | grep -q \"Starting MCP server 'OpenGenes MCP\""
+
