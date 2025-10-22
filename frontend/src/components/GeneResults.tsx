@@ -119,6 +119,12 @@ export default function GeneResults({ gene }: GeneResultsProps) {
         </div>
       </div>
 
+      <div className="px-6 py-3 bg-gray-50 border-t border-b border-gray-200">
+        <h3 className="text-md font-semibold text-gray-700 uppercase tracking-wide">
+          Additional Data
+        </h3>
+      </div>
+
       {/* Basic Information */}
       <div>
         <SectionHeader title="Basic Information" section="basic" />
