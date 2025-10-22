@@ -19,18 +19,20 @@ def set_model(
     )
     return model
 
-def set_user_prompt(uniprot_output, kegg_output, opengenes_output):
+def set_user_prompt(uniprot_output, kegg_output, opengenes_output, gnomad_output):
     return f"""
 You are a bioinformatics summarization agent specialized in the **Longevity Sequence-to-Function Knowledge Base**.
-You will receive as input structured JSON outputs from three data sources:
+You will receive as input structured JSON outputs from next data sources:
 - **UniProt MCP output** (protein sequence, domains, motifs, variants, PTMs)
 - **KEGG MCP output** (pathways, molecular functions, regulatory networks)
 - **OpenGenes MCP output** (longevity associations, interventions, model organism data)
+- **gnomAD MCP output** (pathogenic and likely pathogenic gene variants with functional impact)
 
 ---
 
 ### 🎯 TASK
 Integrate and summarize the information into a **single, human-readable scientific article in Markdown (.md)** format, following the structure below.
+Include insights from gnomAD regarding clinically significant variants and their potential effects on protein structure and function.
 
 Each section should include concise yet informative text suitable for a WikiCrow-style gene/protein entry.
 Where available, include UniProt, KEGG, and OpenGenes IDs and URLs.
@@ -66,6 +68,22 @@ If any data source is missing, gracefully skip the section without placeholders.
 
 - Use data from UniProt and KEGG to describe regions where amino acid changes or truncations alter protein function.
 - Highlight experimentally confirmed relationships (e.g., domain deletions, point mutations, or chimeric constructs).
+
+### 🧬 Clinically Significant Variants (gnomAD / ClinVar)
+Use **gnomAD** data to summarize variants classified as *Pathogenic*, *Likely pathogenic*, or *Pathogenic/Likely pathogenic* according to ClinVar.
+For each variant, include:
+* **Variant ID / genomic position**
+* **Amino acid change (if applicable)**
+* **ClinVar significance**
+* **Predicted or reported functional impact**
+* **Source URL**
+
+| Variant ID | Nucleotide / Protein Change | ClinVar Significance | Functional Impact                                | Source        |
+| ---------- | --------------------------- | -------------------- | ------------------------------------------------ | ------------- |
+| rs#######  | p.Arg234Trp                 | Pathogenic           | Disrupts active site, loss of enzymatic activity | [gnomAD link] |
+
+If no qualifying variants are found, state:
+> “No pathogenic or likely pathogenic variants reported in gnomAD v4.1.0 for this gene.”
 
 ---
 
@@ -109,7 +127,7 @@ From KEGG or UniProt:
 ---
 
 ## 📚 8. References
-List all provided reference links and IDs from the source data (PMIDs, DOIs, KEGG URLs, UniProt links, OpenGenes pages).
+List all provided reference links and IDs from the source data (PMIDs, DOIs, KEGG URLs, UniProt links, OpenGenes pages, gnomAD variant URLs).
 
 ---
 
@@ -131,6 +149,9 @@ KEGG data:
 OpenGenes data:
 {opengenes_output}
 
+gnomAD data:
+{gnomad_output}
+
 ---
 
 ### OUTPUT
@@ -138,7 +159,7 @@ Return only the final Markdown article.
 """
 
 def run_query(
-    uniprot_output, kegg_output, opengenes_output
+    uniprot_output, kegg_output, opengenes_output, gnomad_output
 ):
     agent = ToolCallingAgent(
         model=set_model(),
@@ -147,4 +168,4 @@ def run_query(
         max_steps=10,
     )
     # agent.prompt_templates["system_prompt"] = SYSTEM_PROMPT
-    return agent.run(set_user_prompt(uniprot_output, kegg_output, opengenes_output))
+    return agent.run(set_user_prompt(uniprot_output, kegg_output, opengenes_output, gnomad_output))
