@@ -16,7 +16,7 @@ jobs:
       - name: Checkout MCP repo
         uses: actions/checkout@v3
         with:
-          repository: Augmented-Nature/Augmented-Nature-UniProt-MCP-Server
+          repository: iteleshov/Augmented-Nature-UniProt-MCP-Server
 
       - name: Log in to GHCR
         uses: docker/login-action@v2
