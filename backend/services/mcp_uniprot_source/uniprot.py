@@ -15,7 +15,7 @@ import os
 
 
 # configuration
-def set_server(server_name="youthful_ride"):
+def set_server(server_name="uniprot-mcp-server"):
     server = StdioServerParameters(
         command="docker",
         args=["exec", "-i", server_name, "node", "/app/build/index.js"]
@@ -24,11 +24,11 @@ def set_server(server_name="youthful_ride"):
 
 
 def set_model(
-    api_key=os.environ["NEBIUS_API_KEY"], 
-    api_base="https://api.studio.nebius.com/v1/", 
+    api_key=os.environ["NEBIUS_API_KEY"],
+    api_base="https://api.studio.nebius.com/v1/",
     temperature=0,
     model_name="Qwen/Qwen3-235B-A22B-Instruct-2507"
-): 
+):
     model = OpenAIServerModel(
         model_id=model_name,
         api_key=api_key,
@@ -123,9 +123,9 @@ Do **not** output JSON or code blocks — only clean text with section headers.
 
 def run_query(
     gene,
-    server=set_server(), 
-    model=set_model(), 
-    trust_remote_code=True, 
+    server=set_server(),
+    model=set_model(),
+    trust_remote_code=True,
     structured_output=False
 ):
     system_prompt = SYSTEM_PROMPT
@@ -143,5 +143,5 @@ def run_query(
         )
         agent.prompt_templates["system_prompt"] = system_prompt
         result = agent.run(user_prompt)
-    
+
     return result
