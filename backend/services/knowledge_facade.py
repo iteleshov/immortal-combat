@@ -15,12 +15,27 @@ class KnowledgeBaseFacade:
 
     def search(self, gene_symbol: str) -> GeneResponse:
         def agentic_pipeline(gene_or_protein):
+            """
+            Executes UniProt, KEGG, and OpenGenes queries in parallel for a given gene or protein.
+                Handles exceptions so one failure doesn't stop the pipeline.
+            """
             start = time.perf_counter()
             funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query]
 
             with ThreadPoolExecutor(max_workers=3) as ex:
-                r1, r2, r3 = ex.map(lambda f: f(gene_or_protein), funcs)
-
+                futures = {ex.submit(f, gene_or_protein): i for i, f in enumerate(funcs)}
+                for fut in as_completed(futures):
+                    i = futures[fut]
+                    try:
+                        results[i] = fut.result()
+                    except Exception:
+                        results[i] = 'Agent failed. No data retrieved'
+                
+            uniprot_output, kegg_output, opengenes_output = results
+            try:
+                article = agg.run_query(uniprot_output, kegg_output, opengenes_output)
+            except Exception:
+                article = 'Article creation failed. Try again'
             article = agg.run_query(r1, r2, r3)
             elapsed = time.perf_counter() - start
             print(f"Completed in: {elapsed:.2f} seconds ({elapsed/60:.1f} min)")
