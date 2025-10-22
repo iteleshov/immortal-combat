@@ -1,6 +1,6 @@
 FROM node:20 AS build
 
-WORKDIR /client
+WORKDIR /frontend
 
 COPY package*.json ./
 RUN npm ci
