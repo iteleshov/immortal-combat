@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Dna, BarChart3 } from 'lucide-react'
+import { Menu, X, Dna } from 'lucide-react'
 import { useAppSelector, useAppDispatch } from '../hooks'
 import { toggleSidebar, setActiveTab, closeSidebar } from '../store/uiSlice'
 
