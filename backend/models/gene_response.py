@@ -14,3 +14,4 @@ class GeneResponse(BaseModel):
     interval_in_sequence: Optional[Tuple[int, int]] = None
     contribution_of_evolution: Optional[str] = None
     article: Optional[str] = None
+    externalLink: Optional[str] = None

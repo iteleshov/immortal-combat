@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, FileText } from 'lucide-react'
+import { ChevronDown, ChevronRight, ExternalLink, FileText } from 'lucide-react'
 import { GeneResponse } from '../types'
-import { exportToJSON } from '../services/export'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
@@ -23,10 +22,6 @@ export default function GeneResults({ gene }: GeneResultsProps) {
     setExpandedSections(newExpanded)
   }
 
-  const handleExportJSON = () => {
-    exportToJSON(gene, `${gene.gene}_data`)
-  }
-
   const SectionHeader = ({
     title,
     section,
@@ -43,7 +38,7 @@ export default function GeneResults({ gene }: GeneResultsProps) {
         onClick={() => toggleSection(section)}
         className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 border-b border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
       >
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-lg font-semibold text-gray-700">{title}</h3>
         <div className="flex items-center space-x-2">
           {children}
           {isExpanded ? (
@@ -95,19 +90,31 @@ export default function GeneResults({ gene }: GeneResultsProps) {
           </div>
           <div className="flex space-x-2">
             <button
-              onClick={handleExportJSON}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              onClick={() => {
+                const blob = new Blob([gene.article!!], { type: 'text/plain;charset=utf-8' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `${gene.gene}.wikicrow`
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+                URL.revokeObjectURL(url)
+              }}
+              className="inline-flex items-center px-3 py-2 border border-gray-300
+                         shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700
+                         bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2
+                         focus:ring-primary-500 cursor-pointer"
             >
               <FileText className="h-4 w-4 mr-2" />
-              JSON
+              Wikicrow
             </button>
           </div>
-        </div>
       </div>
 
       {/* Analysis result */}
       <div>
-        <SectionHeader title="Analysis result" section="analysis-result" />
+        <h3 className="text-lg font-semibold text-gray-900">Analysis result</h3>
         <div className="prose prose-gray max-w-none p-6">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -119,8 +126,8 @@ export default function GeneResults({ gene }: GeneResultsProps) {
         </div>
       </div>
 
-      <div className="px-6 py-3 bg-gray-50 border-t border-b border-gray-200">
-        <h3 className="text-md font-semibold text-gray-700 uppercase tracking-wide">
+      <div className="px-6 py-3 border-t border-b border-gray-300">
+        <h3 className="text-md font-semibold text-gray-900 uppercase tracking-wide">
           Additional Data
         </h3>
       </div>
@@ -216,6 +223,26 @@ export default function GeneResults({ gene }: GeneResultsProps) {
           </div>
         )}
       </div>
+    </div>
+    {/* Source */}
+    {gene.externalLink && (
+      <div>
+        <SectionHeader title="Source" section="source" />
+        {expandedSections.has('source') && (
+          <div className="p-6">
+            <a
+              href={gene.externalLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-sm text-primary-600 hover:text-primary-800"
+            >
+              View source article
+              <ExternalLink className="ml-1 h-4 w-4" />
+            </a>
+          </div>
+        )}
+      </div>
+    )}
     </div>
   )
 }

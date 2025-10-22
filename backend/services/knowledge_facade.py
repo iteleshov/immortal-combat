@@ -78,5 +78,6 @@ class KnowledgeBaseFacade:
             interval_in_dna_sequence=n.get("interval_in_dna_sequence"),
             protein_sequence=u.get("protein_sequence"),
             article=article,
+            externalLink=n.get('article') or u.get('article')
         )
         return resp

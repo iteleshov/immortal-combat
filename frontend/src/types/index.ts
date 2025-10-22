@@ -11,6 +11,7 @@ export interface GeneResponse {
   interval_in_sequence?: [number, number];
   contribution_of_evolution?: string;
   article?: string;
+  externalLink?: string;
 }
 
 export interface ComparisonResponse {
