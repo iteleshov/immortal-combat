@@ -1,4 +1,4 @@
-name: CI Backend Build & Push Docker Images to GHCR
+name: CI Frontend Build & Push Docker Images to GHCR
 
 on:
   workflow_dispatch:
