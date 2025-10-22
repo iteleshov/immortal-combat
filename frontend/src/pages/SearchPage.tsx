@@ -4,6 +4,7 @@ import { useAppSelector, useAppDispatch } from '../hooks'
 import { fetchGene, clearError } from '../store/searchSlice'
 import { validateGeneName } from '../services/api'
 import GeneResults from '../components/GeneResults'
+import logo from '../assets/gene-lens-logo.jpg'
 
 export default function SearchPage() {
   const dispatch = useAppDispatch()
@@ -13,7 +14,7 @@ export default function SearchPage() {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!searchTerm.trim()) {
       setValidationError('Please enter a gene name')
       return
@@ -36,10 +37,21 @@ export default function SearchPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gene Search</h1>
-        <p className="text-gray-600">
+      {/* Header with logo */}
+      <div className="flex items-center justify-center mt-8 mb-10 space-x-4">
+        <img
+          src={logo}
+          alt="GeneLens logo"
+          className="w-16 h-16 object-contain rounded"
+        />
+        <h1 className="text-4xl font-bold text-gray-900">
+          Gene<span className="text-primary-600">Lens</span>
+        </h1>
+      </div>
+
+      {/* Description */}
+      <div className="text-center mb-10">
+        <p className="text-gray-600 max-w-2xl mx-auto">
           Search for genes and proteins to explore their sequence-to-function relationships in longevity research.
         </p>
       </div>
@@ -148,4 +160,3 @@ export default function SearchPage() {
     </div>
   )
 }
-
