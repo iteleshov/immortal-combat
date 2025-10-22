@@ -40,8 +40,8 @@ jobs:
 
       - name: Pull latest image
         run: |
-          ssh ubuntu@${{ secrets.SERVER }} "docker compose pull uniprot-mcp-server"
+          ssh ubuntu@$SERVER "docker compose pull uniprot-mcp-server"
 
       - name: Deploy container
         run: |
-          ssh ubuntu@${{ secrets.SERVER }} "docker compose up -d uniprot-mcp-server --force-recreate"
+          ssh ubuntu@$SERVER "docker compose up -d uniprot-mcp-server --force-recreate"
