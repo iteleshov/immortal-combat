@@ -98,7 +98,7 @@ export default function GeneResults({ gene }: GeneResultsProps) {
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
-            a.download = `${gene.gene}.wikicrow`
+            a.download = `${gene.gene}.md`
             document.body.appendChild(a)
             a.click()
             document.body.removeChild(a)
@@ -110,7 +110,7 @@ export default function GeneResults({ gene }: GeneResultsProps) {
                      focus:ring-primary-500 cursor-pointer"
         >
           <FileText className="h-4 w-4 mr-2" />
-          Wikicrow
+          Download
         </button>
       </div>
 
