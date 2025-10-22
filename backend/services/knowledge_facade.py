@@ -1,6 +1,6 @@
 from backend.services.mcp_uniprot_source import uniprot
 from backend.services.kegg_source import kegg
-form backend.services.open_genes_source import opengenes
+from backend.services.open_genes_source import opengenes
 from backend.services.uniprot_source import UniProtSource
 from backend.services.ncbi_source import NcbiSource
 from backend.models.gene_response import GeneResponse
@@ -24,10 +24,10 @@ class KnowledgeBaseFacade:
             elapsed = time.perf_counter() - start
             print(f"Completed in: {elapsed:.2f} seconds ({elapsed/60:.1f} min)")
             return article
-            
+
         gene_symbol = gene_symbol.strip()
         u = self.uniprot.fetch(gene_symbol)
-        n = self.ncbi.fetch(gene_symbol)    
+        n = self.ncbi.fetch(gene_symbol)
         article = agentic_pipeline(gene_symbol)
         print("result article")
         print(article)
