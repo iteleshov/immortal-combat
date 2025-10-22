@@ -101,7 +101,8 @@ def set_model(
     return model
 
 
-SYSTEM_PROMPT = open('opengenes_system_prompt.txt', 'r').read()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SYSTEM_PROMPT_PATH = os.path.join(BASE_DIR, 'opengenes_system_prompt.txt')
 def set_user_prompt_og(gene):
     return f"""
             What are:
