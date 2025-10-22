@@ -95,14 +95,23 @@ export default function GeneResults({ gene }: GeneResultsProps) {
           </div>
           <div className="flex space-x-2">
             <button
-              onClick={handleExportJSON}
+              onClick={() => {
+                const blob = new Blob([gene.article!!], { type: 'text/plain;charset=utf-8' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `${gene.gene}.wikicrow`
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+                URL.revokeObjectURL(url)
+              }}
               className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
               <FileText className="h-4 w-4 mr-2" />
-              JSON
+              Wikicrow
             </button>
           </div>
-        </div>
       </div>
 
       {/* Analysis result */}
