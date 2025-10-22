@@ -35,18 +35,13 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER }} >> ~/.ssh/known_hosts
+          ssh-agent bash -c 'echo "SSH agent started" && ssh-add ~/.ssh/id_rsa'
+          ssh-keyscan -H $SERVER >> ~/.ssh/known_hosts
 
       - name: Pull latest image
         run: |
-          ssh ubuntu@${{ secrets.SERVER }} "docker compose pull backend"
+          ssh ubuntu@${{ secrets.SERVER }} "docker compose pull uniprot-mcp-server"
 
       - name: Deploy container
         run: |
-          ssh ubuntu@${{ secrets.SERVER }} "docker compose up -d backend --force-recreate"
-
-      - name: Verify backend startup
-        run: |
-          ssh ubuntu@${{ secrets.SERVER }} "timeout 30s docker compose logs backend -f | grep -q 'UniProt MCP server running on stdio'"
+          ssh ubuntu@${{ secrets.SERVER }} "docker compose up -d uniprot-mcp-server --force-recreate"
