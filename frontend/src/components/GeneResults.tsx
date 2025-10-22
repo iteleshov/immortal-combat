@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { ChevronDown, ChevronRight, FileText } from 'lucide-react'
 import { GeneResponse } from '../types'
 import { exportToJSON } from '../services/export'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
 
 interface GeneResultsProps {
   gene: GeneResponse
@@ -105,10 +108,14 @@ export default function GeneResults({ gene }: GeneResultsProps) {
       {/* Analysis result */}
       <div>
         <SectionHeader title="Analysis result" section="analysis-result" />
-        <div className="p-6">
-          <p className="text-sm text-gray-900 leading-relaxed">
+        <div className="prose prose-gray max-w-none p-6">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
+            className="text-sm leading-relaxed text-gray-900"
+          >
             {gene.article}
-          </p>
+          </ReactMarkdown>
         </div>
       </div>
 

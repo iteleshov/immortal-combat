@@ -17,7 +17,7 @@
   html {
     font-family: 'Inter', system-ui, sans-serif;
   }
-  
+
   body {
     /* literal values taken from tailwind.config.js */
     background-color: #f8fafc; /* secondary.50 */
@@ -29,7 +29,7 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -42,4 +42,24 @@
   color: var(--color-text-primary);
 }
 
+.prose a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.prose th,
+.prose td {
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem;
+}
+
+.prose th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
 

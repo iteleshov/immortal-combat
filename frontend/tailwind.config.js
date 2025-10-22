@@ -68,7 +68,9 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
   safelist: [
     'bg-background-card',
     'text-primary',
