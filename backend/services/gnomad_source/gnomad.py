@@ -1,18 +1,13 @@
-from smolagents import ToolCollection, InferenceClientModel, OpenAIServerModel, ToolCallingAgent
+from smolagents import ToolCollection, OpenAIServerModel, ToolCallingAgent
 from mcp import StdioServerParameters
 import os
 
-
-absolute_path_to_mcp = ""
-
 MODEL = "Qwen/Qwen3-235B-A22B-Thinking-2507"
 
-os.environ['NEBIUS_API_KEY'] = open('secret.txt', 'r').read().strip()
-
-def set_server(absolute_path_to_mcp):
+def set_server(server_name="gnomad-mcp-server"):
     server = StdioServerParameters(
-        command="node",
-        args=[absolute_path_to_mcp + "dist/index.js"]
+        command="docker",
+        args=["exec", "-i", server_name, "node", "/app/dist/index.js"]
     )
     return server
 
@@ -52,7 +47,7 @@ If none found, state: 'No qualifying variants found in gnomAD v4.1.0 for gene {G
 
 def run_query(
         gene,
-        server=set_server(absolute_path_to_mcp),
+        server=set_server(),
         model=set_model(),
         trust_remote_code=True,
         structured_output=False
@@ -68,7 +63,7 @@ def run_query(
             model=model,
             tools=[*tools.tools],
             add_base_tools=False,
-            max_steps=7 ,
+            max_steps=5,
         )
         agent.prompt_templates["system_prompt"] = system_prompt
         result = agent.run(user_prompt)
