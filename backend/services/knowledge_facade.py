@@ -1,6 +1,6 @@
 from backend.services.mcp_uniprot_source import uniprot
 from backend.services.kegg_source import kegg
-form backend.services.open_genes_source import opengenes
+from backend.services.open_genes_source import opengenes
 from backend.services.uniprot_source import UniProtSource
 from backend.services.ncbi_source import NcbiSource
 from backend.models.gene_response import GeneResponse
@@ -16,7 +16,7 @@ class KnowledgeBaseFacade:
         def agentic_pipeline(gene_or_protein):
             """
             Executes UniProt, KEGG, and OpenGenes queries in parallel for a given gene or protein.
-            Handles exceptions so one failure doesn't stop the pipeline.
+                Handles exceptions so one failure doesn't stop the pipeline.
             """
             start = time.perf_counter()
             funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query]
