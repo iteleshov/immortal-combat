@@ -3,14 +3,14 @@ import { mockGenes } from '../data/mockGenes'
 import { mockComparison } from '../data/mockComparison'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true' || true
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 
 // Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 export const searchGene = async (geneName: string): Promise<GeneResponse> => {
   await delay(800) // Simulate network delay
-  
+
   if (USE_MOCK_DATA) {
     const gene = mockGenes[geneName.toUpperCase()]
     if (!gene) {
@@ -18,7 +18,7 @@ export const searchGene = async (geneName: string): Promise<GeneResponse> => {
     }
     return gene
   }
-  
+
   // Real API call
   const response = await fetch(`${API_BASE_URL}/search?gene_name=${encodeURIComponent(geneName)}`)
   if (!response.ok) {
@@ -28,9 +28,8 @@ export const searchGene = async (geneName: string): Promise<GeneResponse> => {
 }
 
 export const compareGenes = async (genes: string[]): Promise<ComparisonResponse> => {
-  await delay(1200) // Simulate network delay
-  
   if (USE_MOCK_DATA) {
+    await delay(1200) // Simulate network delay
     // Validate all genes exist
     for (const gene of genes) {
       if (!mockGenes[gene.toUpperCase()]) {
@@ -42,7 +41,7 @@ export const compareGenes = async (genes: string[]): Promise<ComparisonResponse>
       genes_compared: genes
     }
   }
-  
+
   // Real API call
   const response = await fetch(`${API_BASE_URL}/compare`, {
     method: 'POST',
@@ -51,7 +50,7 @@ export const compareGenes = async (genes: string[]): Promise<ComparisonResponse>
     },
     body: JSON.stringify({ genes }),
   })
-  
+
   if (!response.ok) {
     throw new Error('Failed to compare genes')
   }
