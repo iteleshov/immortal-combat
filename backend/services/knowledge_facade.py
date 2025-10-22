@@ -1,3 +1,4 @@
+from backend.services.aggregation import agg
 from backend.services.mcp_uniprot_source import uniprot
 from backend.services.kegg_source import kegg
 from backend.services.open_genes_source import opengenes
