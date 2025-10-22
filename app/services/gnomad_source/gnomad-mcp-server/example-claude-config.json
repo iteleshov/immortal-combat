@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "gnomad": {
+      "command": "node",
+      "args": ["/absolute/path/to/gnomad-mcp-server/dist/index.js"],
+      "env": {}
+    }
+  },
+  "_comment": "Replace /absolute/path/to/ with the actual path to your gnomad-mcp-server installation"
+}
