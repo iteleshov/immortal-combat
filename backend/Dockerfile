@@ -7,7 +7,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /usr/src/backend
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y docker-cli && \
+    apt-get install -y --no-install-recommends \
     git build-essential curl && \
     rm -rf /var/lib/apt/lists/*
 
