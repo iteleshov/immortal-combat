@@ -6,10 +6,18 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      SERVER: ${{ secrets.EC2_HOST }}
 
     steps:
-      - name: Checkout repository
+      - name: Checkout this repo
         uses: actions/checkout@v3
+
+      - name: Checkout MCP repo
+        uses: actions/checkout@v3
+        with:
+          repository: Augmented-Nature/Augmented-Nature-UniProt-MCP-Server
+          path: mcp
 
       - name: Log in to GHCR
         uses: docker/login-action@v2
@@ -20,7 +28,7 @@ jobs:
 
       - name: Build & Push Docker Image
         run: |
-          docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/uniprot-mcp-server:latest .
+          docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/uniprot-mcp-server:latest mcp
           docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/uniprot-mcp-server:latest
 
       - name: Set up SSH key
@@ -30,16 +38,16 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.SERVER }} >> ~/.ssh/known_hosts
 
-      - name: Pull latest image on server
+      - name: Pull latest image
         run: |
-          ssh ubuntu@${{ secrets.SERVER_HOST }} "docker compose pull uniprot-mcp-server"
+          ssh ubuntu@${{ secrets.SERVER }} "docker compose pull backend"
 
       - name: Deploy container
         run: |
-          ssh ubuntu@${{ secrets.SERVER_HOST }} "docker compose up -d uniprot-mcp-server --force-recreate"
+          ssh ubuntu@${{ secrets.SERVER }} "docker compose up -d backend --force-recreate"
 
-      - name: Verify startup
+      - name: Verify backend startup
         run: |
-          ssh ubuntu@${{ secrets.SERVER_HOST }} "timeout 30s docker compose logs uniprot-mcp-server -f | grep -q 'UniProt MCP server running on stdio'"
+          ssh ubuntu@${{ secrets.SERVER }} "timeout 30s docker compose logs backend -f | grep -q 'UniProt MCP server running on stdio'"
