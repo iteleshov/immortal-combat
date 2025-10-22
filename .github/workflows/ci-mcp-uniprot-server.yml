@@ -10,9 +10,6 @@ jobs:
       SERVER: ${{ secrets.EC2_HOST }}
 
     steps:
-      - name: Checkout this repo
-        uses: actions/checkout@v3
-
       - name: Checkout MCP repo
         uses: actions/checkout@v3
         with:
