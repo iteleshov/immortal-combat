@@ -4,6 +4,7 @@ import { GeneResponse } from '../types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
+import logo from '../assets/gene-lens-logo.jpg'
 
 interface GeneResultsProps {
   gene: GeneResponse
@@ -78,8 +79,9 @@ export default function GeneResults({ gene }: GeneResultsProps) {
   return (
     <div id="gene-results" className="bg-white rounded-lg shadow-sm border">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center justify-between">
+      <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <img src={logo} alt="GeneLens logo" className="w-10 h-10 object-contain rounded" />
           <div>
             <h2 className="text-2xl font-bold text-gray-900">{gene.gene}</h2>
             {gene.synonyms.length > 0 && (
@@ -88,33 +90,32 @@ export default function GeneResults({ gene }: GeneResultsProps) {
               </p>
             )}
           </div>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => {
-                const blob = new Blob([gene.article!!], { type: 'text/plain;charset=utf-8' })
-                const url = URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = `${gene.gene}.wikicrow`
-                document.body.appendChild(a)
-                a.click()
-                document.body.removeChild(a)
-                URL.revokeObjectURL(url)
-              }}
-              className="inline-flex items-center px-3 py-2 border border-gray-300
-                         shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700
-                         bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2
-                         focus:ring-primary-500 cursor-pointer"
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Wikicrow
-            </button>
-          </div>
+        </div>
+
+        <button
+          onClick={() => {
+            const blob = new Blob([gene.article!!], { type: 'text/plain;charset=utf-8' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `${gene.gene}.wikicrow`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
+          }}
+          className="inline-flex items-center px-3 py-2 border border-gray-300
+                     shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700
+                     bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2
+                     focus:ring-primary-500 cursor-pointer"
+        >
+          <FileText className="h-4 w-4 mr-2" />
+          Wikicrow
+        </button>
       </div>
 
       {/* Analysis result */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900">Analysis result</h3>
         <div className="prose prose-gray max-w-none p-6">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -126,7 +127,8 @@ export default function GeneResults({ gene }: GeneResultsProps) {
         </div>
       </div>
 
-      <div className="px-6 py-3 border-t border-b border-gray-300">
+      {/* Divider: Additional Data */}
+      <div className="px-6 py-3 border-t border-b border-gray-300 bg-transparent">
         <h3 className="text-md font-semibold text-gray-900 uppercase tracking-wide">
           Additional Data
         </h3>
@@ -212,37 +214,31 @@ export default function GeneResults({ gene }: GeneResultsProps) {
         <SectionHeader title="Sequences" section="sequences" />
         {expandedSections.has('sequences') && (
           <div className="p-6 space-y-6">
-            <SequenceDisplay
-              sequence={gene.protein_sequence}
-              title="Protein Sequence"
-            />
-            <SequenceDisplay
-              sequence={gene.dna_sequence}
-              title="DNA Sequence"
-            />
+            <SequenceDisplay sequence={gene.protein_sequence} title="Protein Sequence" />
+            <SequenceDisplay sequence={gene.dna_sequence} title="DNA Sequence" />
           </div>
         )}
       </div>
-    </div>
-    {/* Source */}
-    {gene.externalLink && (
-      <div>
-        <SectionHeader title="Source" section="source" />
-        {expandedSections.has('source') && (
-          <div className="p-6">
-            <a
-              href={gene.externalLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center text-sm text-primary-600 hover:text-primary-800"
-            >
-              View source article
-              <ExternalLink className="ml-1 h-4 w-4" />
-            </a>
-          </div>
-        )}
-      </div>
-    )}
+
+      {/* Source */}
+      {gene.externalLink && (
+        <div>
+          <SectionHeader title="Source" section="source" />
+          {expandedSections.has('source') && (
+            <div className="p-6">
+              <a
+                href={gene.externalLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center text-sm text-primary-600 hover:text-primary-800"
+              >
+                View source article
+                <ExternalLink className="ml-1 h-4 w-4" />
+              </a>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
