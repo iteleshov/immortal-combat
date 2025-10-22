@@ -82,9 +82,6 @@ export default function GeneResults({ gene }: GeneResultsProps) {
       <div className="p-6 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <img src={logo} alt="GeneLens logo" className="w-10 h-10 object-contain rounded" />
-          <h1 className="text-4xl font-bold text-gray-900">
-            Gene<span className="text-primary-600">Lens</span>
-          </h1>
           <div>
             <h2 className="text-2xl font-bold text-gray-900">{gene.gene}</h2>
             {gene.synonyms.length > 0 && (
@@ -119,7 +116,6 @@ export default function GeneResults({ gene }: GeneResultsProps) {
 
       {/* Analysis result */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 px-6 pt-6">Analysis result</h3>
         <div className="prose prose-gray max-w-none p-6">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
