@@ -23,12 +23,13 @@ def set_server(server_name="youthful_ride"):
     )
     return server
 
+
 def set_model(
-        api_key=os.environ["NEBIUS_API_KEY"],
-        api_base="https://api.studio.nebius.com/v1/",
-        temperature=0,
-        model_name="Qwen/Qwen3-235B-A22B-Instruct-2507"
-):
+    api_key=os.environ["NEBIUS_API_KEY"], 
+    api_base="https://api.studio.nebius.com/v1/", 
+    temperature=0,
+    model_name="Qwen/Qwen3-235B-A22B-Instruct-2507"
+): 
     model = OpenAIServerModel(
         model_id=model_name,
         api_key=api_key,
@@ -39,207 +40,109 @@ def set_model(
 
 
 SYSTEM_PROMPT = """
-You are a **bioinformatics research agent** connected exclusively to the **Augmented-Nature-UniProt-MCP-Server**.
-Your task is to retrieve and synthesize comprehensive information about a given protein — based only on UniProt data —
-using the tools provided by this MCP server.
+You are a bioinformatics research agent connected exclusively to the Augmented-Nature-UniProt-MCP-Server.
 
-The user will provide **only a protein name, gene name, synonym, or UniProt accession ID** (for example, “NRF2”, “NFE2L2”, or “Q16236”).
-You must query UniProt via the available tools (e.g., `search_proteins`, `get_protein_info`, `get_protein_features`, `get_protein_sequence`)
-and return a structured, well-written, scientific text describing the protein.
+Your task is to retrieve precise protein information from UniProt and its linked databases for a given gene or protein name.
 
-If any data are missing, clearly state that they are not available in UniProt.
-Do not invent or infer facts beyond UniProt annotations.
-Return your answer **only as text** — not as JSON.
+Scope of retrieval:
+1. Canonical UniProt entry (include a FASTA link, not the raw sequence).
+2. Isoforms (alternative splicing) — names, UniProt IDs, and lengths.
+3. Functional regions and sequence features — domains, motifs, regions, sites, mutagenesis.
+4. Natural variants and mutagenesis experiments with described functional effects.
+5. Post-translational modifications (PTMs) such as phosphorylation, acetylation, methylation, ubiquitination, etc.
+6. Subcellular location annotations.
+7. Cross-references: HGNC, Ensembl, PDB, Reactome, Gene Ontology (GO), KEGG.
 
----
-
-### 📘 Structure and Content of the Response
-
-Format your output as a structured scientific text with section headings (`###`), lists, and tables where appropriate.
-Highlight sequence intervals, amino acid positions, and modifications clearly.
-
-Your report **must include all the following sections**, even if some are empty.
-Strictly follow the schema provided. Your answer must have all these sections. 
-If you find any additional information tou find valuable include it in the report.
-Aging relation is a very important section.
----
-
-#### **1. Gene / Protein Name / ID**
-
-* Primary protein name and UniProt Accession ID.
-* Gene name encoding the protein.
-* All known synonyms and alternative names.
-* Organism (species) of origin.
-* List isoforms, if available.
-
----
-
-#### **2. Protein / DNA Sequence**
-
-* Link to amino acid sequence (DO NOT print the sequence itself!).
-* Length, molecular mass, isoelectric point.
-* All known isoforms (canonical and alternative).
-* If a specific interval is provided (e.g., residues 100–200), extract and display that fragment.
-* Indicate functional or domain regions located within that interval.
-
----
-
-#### **3. Interval in Sequence**
-
-* Identify notable regions of the protein: motifs, domains, active sites, binding regions, or signal sequences.
-* For each interval, specify start and end positions, domain/motif name, and biological function.
-* If a specific interval is requested, explain its biological role or structural relevance.
-
----
-
-#### **4. Function (Text Format)**
-
-* Describe in detail the biological and molecular functions of the protein.
-* Include its role in cellular pathways, molecular mechanisms, and known interaction partners.
-* List Gene Ontology (GO) annotations: Molecular Function, Biological Process, Cellular Component.
-* For enzymes, include catalytic activity and substrates/products.
-* Mention any known interacting proteins if annotated.
-
----
-
-#### **5. Modification Effects**
-
-* List all annotated **post-translational modifications** (PTMs): phosphorylation, acetylation, ubiquitination, etc.
-* For each modification, include:
-
-  * the type of modification;
-  * the modified residue and position (e.g., Ser40);
-  * the functional consequence (e.g., “promotes dissociation from KEAP1”).
-* If natural variants or mutations are annotated, include them and describe their impact if available.
-
----
-
-#### **6. Longevity Association**
-
-* Identify any UniProt-annotated information relating the protein to **longevity, aging, oxidative stress, or lifespan regulation**.
-* Describe how the protein contributes to stress resistance, repair mechanisms, or metabolic adaptation.
-* If no longevity connection is annotated, explicitly state: *“No known association with longevity is reported in UniProt.”*
-
----
-
-#### **7. Evolutionary Conservation**
-
-* Describe how evolutionarily conserved this protein is.
-* List known **orthologs** in other species with UniProt IDs and approximate sequence identity.
-* Mention **paralogs** within the same organism, if any.
-* Identify which motifs or domains are most conserved.
-
----
-
-#### **8. Orthologs and Paralogs Across Species**
-
-* Provide examples of orthologs and functional analogs (e.g., SKN-1 in *C. elegans*).
-* State the degree of sequence identity, main similarities, and conserved regions.
-* If paralogs perform distinct functions, summarize these functional differences.
-
----
-
-#### **9. Known Genetic Interventions**
-
-* List any annotated **experimental manipulations** (knock-out, knock-in, overexpression, RNA interference, etc.).
-* Summarize reported phenotypic effects or changes in activity.
-* If no such experiments are annotated in UniProt, explicitly say so.
-
----
-
-#### **10. Mutant Strains Data**
-
-* Describe known mutant strains associated with this gene or protein.
-* Include observed phenotypes (e.g., increased stress sensitivity, altered transcriptional regulation).
-* Indicate the model organism (e.g., *Mus musculus*, *Drosophila melanogaster*, *C. elegans*).
-
----
-
-#### **11. Small Molecule Binding Data**
-
-* List annotated small molecule or protein binding sites.
-* For each ligand, specify:
-
-  * the molecule’s name;
-  * the amino acid positions involved in binding;
-  * the interaction type (inhibition, activation, etc.);
-  * the effect on the protein’s activity.
-
----
-
-#### **12. Tunable Coarse-Graining**
-
-* Summarize the information at different levels of abstraction:
-
-  * individual amino acids or motifs;
-  * structural domains (e.g., Neh2, bZIP);
-  * domain families;
-  * broader protein classes (e.g., basic leucine zipper transcription factors).
-* Explain how the protein’s function or interactions can be understood at each level.
-
----
-
-#### **13. Summary**
-
-* Provide a concise synthesis of key information:
-
-  * the main biological role of the protein,
-  * major structural or functional domains,
-  * key modifications or interactions,
-  * relevance to stress response, signaling, or longevity, if annotated.
-
----
-
-### ⚙️ Style and Output Requirements
-
-* Use **scientific but readable** English.
-* Follow the order and section titles above.
-* If a section lacks data, explicitly state: “Data not available in UniProt.”
+Rules:
+- Use **only** data obtained directly from MCP tools (e.g., `search_proteins`, `get_protein_info`, `get_protein_features`, `get_cross_references`).
+- **Do not guess or fabricate** any facts not explicitly found in tool outputs.
+- Keep biological names and identifiers exactly as in UniProt.
+- Prefer full lists if multiple values exist.
 """
 
-def set_user_prompt(protein):
+def set_user_prompt(gene_or_protein_name):
     return f"""
-Return the data for the human protein: {protein}
-During the search do not request the fields that won't help to fetch data in order to reduce the size of return.
-Stick to the following schema:
-#### **1. Gene / Protein Name / ID**
-#### **2. Protein / DNA Sequence** (print only link to the sequence, DO NOT print the whole sequence)
-#### **3. Interval in Sequence**
-#### **5. Natural Variants**
-#### **6. Evolutionary Conservation**
-#### **7. Orthologs and Paralogs Across Species**
-# <--the following sections must consider as the human protein, its variants and orthologs and paralogs-->
-#### **8. Function (Text Format)**
-#### **9. Modification Effects**
-#### **10. Longevity Association**
-#### **11. Known Genetic Interventions**
-#### **12. Mutant Strains Data**
-#### **13. Small Molecule Binding Data**
-#### **14. Tunable Coarse-Graining**
-#### **15. Summary**
+Protein: {gene_or_protein_name}
+
+Retrieve all available UniProt data per the scope above, using only MCP tool outputs. 
+Do not invent or infer missing information.
+Search recommendations: Use more than 1 search results. String indices must be integers, not 'str'.
+Rules and priorities:
+1. **Always prefer reviewed (Swiss-Prot) entries** over unreviewed (TrEMBL) ones when both exist.
+2. If the search results include multiple entries, select the one explicitly marked as “UniProtKB reviewed (Swiss-Prot)” — this is the canonical human record.
+3. Never claim that data is “missing” if a reviewed canonical entry was found.
+4. If both a fragment and a full canonical entry are present, use the full reviewed one and ignore the fragment.
+5. Use only the information retrieved from MCP tool outputs. Do not add facts from external knowledge.
+6. If no reviewed entry is found at all, then and only then mention that data may be incomplete.
+
+When writing the summary:
+- Use bullet points or short factual sentences under each section.
+- Include FASTA links and UniProt IDs where available.
+- Do not include commentary about the search process or tool execution.
+- Do not add speculative language like “may be”, “possibly”, “appears to”.
+- All information must be based ONLY on the data retrieved by via tools. 
+If any of the sections are unavailable print "Info unavailable" - do not invent facts.
+
+Write a concise, readable plain-text summary of the retrieved UniProt data.
+Stick to this structure in output:
+1. **Canonical sequence and isoforms**
+   - Retrieve the canonical FASTA sequence and all annotated isoforms (alternative splicing variants).  
+   - Note sequence length and UniProt accession for each.
+
+2. **Functional sequence intervals**
+   - From `features`: list all annotated *regions, domains, motifs, sites,* and *mutagenesis* entries.  
+   - For each, include:
+     • name of interval  
+     • amino-acid positions  
+     • description or known binding partner  
+     • experimental notes (e.g., “loss of KEAP1 binding”, “increased transcriptional activity”).
+
+3. **Natural variants and mutagenesis data**
+   - Extract annotated variants and experimental mutagenesis results.  
+   - For each, specify: position → substitution → observed functional consequence (e.g. “S40A — abolishes phosphorylation”).  
+   - Focus on those affecting activity, binding, or stability.
+
+4. **Post-translational modifications (PTM)**
+   - Summarize all PTM annotations (phosphorylation, acetylation, ubiquitination, etc.) with residue positions and known effect on function.
+
+5. **Cross-references**
+   - Include available cross-links to HGNC, Ensembl, PDB, Reactome, Gene Ontology, and KEGG.  
+   - Briefly describe what each reference contributes (e.g. “Reactome → NRF2 pathway in oxidative stress response”).
+
+6. **Subcellular location**
+   - State primary and secondary locations from UniProt annotation (e.g. “Cytoplasm → Nucleus translocation upon activation”).  
+   - Note relevance to function or degradation (e.g. “KEAP1-mediated cytoplasmic retention”).
+
+7. **Longevity relevance**
+   - When possible, highlight how these functional regions or variants are implicated in lifespan regulation (e.g. “Neoaves KEAP1 mutation → constitutive NRF2 activation → increased stress resistance”).
+
+When calling MCP tools, use only the UniProt tools available in the current MCP server (e.g., `bc_search_uniprot_entries`, `bc_get_uniprot_entry`, `bc_get_uniprot_features`, `bc_get_uniprot_variants`, `bc_get_uniprot_crossrefs`, `bc_get_uniprot_subcellular_location`, etc. — depending on implementation).
+
+Return concise, human-readable research text suitable for direct inclusion into a WikiCrow-style article.  
+Do **not** output JSON or code blocks — only clean text with section headers.
 """
 
 def run_query(
-        gene,
-        server=set_server(),
-        model=set_model(),
-        trust_remote_code=True,
-        structured_output=False
+    gene,
+    server=set_server(), 
+    model=set_model(), 
+    trust_remote_code=True, 
+    structured_output=False
 ):
     system_prompt = SYSTEM_PROMPT
     user_prompt = set_user_prompt(gene)
     with ToolCollection.from_mcp(
-            server_parameters=server,
-            trust_remote_code=trust_remote_code,
-            structured_output=structured_output
+        server_parameters=server,
+        trust_remote_code=trust_remote_code,
+        structured_output=structured_output
     ) as tools:
         agent = ToolCallingAgent(
             model=model,
             tools=[*tools.tools],
             add_base_tools=False,
-            max_steps=3,
+            max_steps=1,
         )
         agent.prompt_templates["system_prompt"] = system_prompt
         result = agent.run(user_prompt)
-
+    
     return result
