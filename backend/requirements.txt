@@ -5,3 +5,4 @@ python-dotenv
 smolagents[openai]
 smolagents[mcp]
 git+https://github.com/modelcontextprotocol/python-sdk.git
+beautifulsoup4
