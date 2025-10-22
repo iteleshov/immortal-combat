@@ -116,7 +116,7 @@ client/
 
 The frontend integrates with the FastAPI backend through these endpoints:
 
-- `GET /search?gene_name={name}` - Search for a gene
+- `GET /api/search?gene_name={name}` - Search for a gene
 - `POST /compare` - Compare multiple genes
 
 When `VITE_USE_MOCK_DATA=true`, the frontend uses mock data instead of making real API calls.

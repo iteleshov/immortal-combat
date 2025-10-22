@@ -15,7 +15,6 @@ export default function Layout({ children }: LayoutProps) {
 
   const navigation = [
     { name: 'Search', href: '/', icon: Dna, tab: 'search' as const },
-    { name: 'Comparison', href: '/comparison', icon: BarChart3, tab: 'comparison' as const },
   ]
 
   // Enhance hover and focus states for navigation links

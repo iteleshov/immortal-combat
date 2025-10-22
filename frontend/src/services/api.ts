@@ -1,6 +1,5 @@
-import { GeneResponse, ComparisonResponse } from '../types'
+import { GeneResponse } from '../types'
 import { mockGenes } from '../data/mockGenes'
-import { mockComparison } from '../data/mockComparison'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true'
@@ -20,39 +19,9 @@ export const searchGene = async (geneName: string): Promise<GeneResponse> => {
   }
 
   // Real API call
-  const response = await fetch(`${API_BASE_URL}/search?gene_name=${encodeURIComponent(geneName)}`)
+  const response = await fetch(`${API_BASE_URL}/api/search?gene_name=${encodeURIComponent(geneName)}`)
   if (!response.ok) {
     throw new Error('Failed to fetch gene data')
-  }
-  return response.json()
-}
-
-export const compareGenes = async (genes: string[]): Promise<ComparisonResponse> => {
-  if (USE_MOCK_DATA) {
-    await delay(1200) // Simulate network delay
-    // Validate all genes exist
-    for (const gene of genes) {
-      if (!mockGenes[gene.toUpperCase()]) {
-        throw new Error(`Gene "${gene}" not found`)
-      }
-    }
-    return {
-      ...mockComparison,
-      genes_compared: genes
-    }
-  }
-
-  // Real API call
-  const response = await fetch(`${API_BASE_URL}/compare`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ genes }),
-  })
-
-  if (!response.ok) {
-    throw new Error('Failed to compare genes')
   }
   return response.json()
 }
