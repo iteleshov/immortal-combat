@@ -46,3 +46,14 @@ jobs:
       - name: Verify kegg-mcp-server startup after deployment
         run: |
           ssh ubuntu@$SERVER "timeout 10s docker compose logs kegg-mcp-server -f | grep -q 'KEGG MCP server running on stdio'"
+
+      - name: Verify kegg-mcp-server is running
+        run: |
+          ssh ubuntu@$SERVER "
+            if docker ps --filter 'name=kegg-mcp-server' --filter 'status=running' --format '{{.Names}}' | grep -q 'kegg-mcp-server'; then
+              echo 'kegg-mcp-server is running'
+            else
+              echo 'kegg-mcp-server is NOT running'
+              exit 1
+            fi
+          "
