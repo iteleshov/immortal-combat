@@ -1,7 +1,11 @@
-from backend.services.mcp_uniprot_source.uniprot import run_query
+from backend.services.mcp_uniprot_source import uniprot
+from backend.services.kegg_source import kegg
+form backend.services.open_genes_source import opengenes
 from backend.services.uniprot_source import UniProtSource
 from backend.services.ncbi_source import NcbiSource
 from backend.models.gene_response import GeneResponse
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class KnowledgeBaseFacade:
     def __init__(self):
@@ -9,12 +13,24 @@ class KnowledgeBaseFacade:
         self.ncbi = NcbiSource()
 
     def search(self, gene_symbol: str) -> GeneResponse:
+        def agentic_pipeline(gene_or_protein):
+            start = time.perf_counter()
+            funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query]
+
+            with ThreadPoolExecutor(max_workers=3) as ex:
+                r1, r2, r3 = ex.map(lambda f: f(gene_or_protein), funcs)
+
+            article = agg.run_query(r1, r2, r3)
+            elapsed = time.perf_counter() - start
+            print(f"Completed in: {elapsed:.2f} seconds ({elapsed/60:.1f} min)")
+            return article
+            
         gene_symbol = gene_symbol.strip()
         u = self.uniprot.fetch(gene_symbol)
-        n = self.ncbi.fetch(gene_symbol)
-        mcp_uniprot = run_query(gene_symbol)
-        print("result mcp_uniprot")
-        print(mcp_uniprot)
+        n = self.ncbi.fetch(gene_symbol)    
+        article = agentic_pipeline(gene_symbol)
+        print("result article")
+        print(article)
 
         resp = GeneResponse(
             gene=gene_symbol.upper(),
