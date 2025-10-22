@@ -43,6 +43,6 @@ jobs:
         run: |
           ssh ubuntu@$SERVER "docker compose up -d uniprot-mcp-server --force-recreate"
 
-      - name: Verify backend startup after deployment
+      - name: Verify uniprot-mcp-server startup after deployment
         run: |
           ssh ubuntu@$SERVER "timeout 10s docker compose logs uniprot-mcp-server -f | grep -q 'UniProt MCP server running on stdio'"

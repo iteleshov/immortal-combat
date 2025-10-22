@@ -47,3 +47,7 @@ jobs:
       - name: Deploy container
         run: |
           ssh ubuntu@$SERVER "docker compose up -d opengenes-mcp-server --force-recreate"
+
+      - name: Verify opengenes-mcp-server startup after deployment
+        run: |
+          ssh ubuntu@$SERVER "timeout 10s docker compose logs uniprot-mcp-server -f | grep -q \"  Starting MCP server 'OpenGenes MCP'\""
