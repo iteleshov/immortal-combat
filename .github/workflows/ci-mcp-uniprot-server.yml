@@ -28,7 +28,7 @@ jobs:
 
       - name: Build & Push Docker Image
         run: |
-          docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/uniprot-mcp-server:latest mcp
+          docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/uniprot-mcp-server:latest .
           docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/uniprot-mcp-server:latest
 
       - name: Set up SSH key
