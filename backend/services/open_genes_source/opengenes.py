@@ -9,15 +9,16 @@ import os
 import json
 import requests, re
 from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor
 
 class ReadScholarlyByDOI(Tool):
     name = "read_scholarly_by_doi"
     description = (
-        "Read article by DOI. Priority: PubMed→PMC (open access). "
-        "If PMC is absent — return abstract from PubMed."
+        "Читает статью по DOI. Приоритет: PubMed→PMC (open access). "
+        "Если PMC нет — возвращает абстракт с PubMed."
     )
 
-    # 1) inputs — keys must match with signature forward()
+    # 1) inputs — ключи должны совпадать с сигнатурой forward()
     inputs = {
         "doi": {"type": "string", "required": True, "description": "Напр.: 10.1111/j.1474-9726.2009.00493.x"}
     }
@@ -86,11 +87,11 @@ def set_server():
     return server
 
 def set_model(
-    api_key=os.environ["NEBIUS_API_KEY"],
-    api_base="https://api.studio.nebius.com/v1/",
+    api_key=os.environ["NEBIUS_API_KEY"], 
+    api_base="https://api.studio.nebius.com/v1/", 
     temperature=0,
     model_name="Qwen/Qwen3-235B-A22B-Instruct-2507"
-):
+): 
     model = OpenAIServerModel(
         model_id=model_name,
         api_key=api_key,
@@ -108,11 +109,18 @@ def set_user_prompt_og(gene):
             - Modification effects
             - Known genetic interventions
             - Disease involvement
-            - Table of SNPs: [...] (columns: rsID, Polymorphism type, Association type, Significance, Research type, Link to details)
+            - Table of Allelic polymorphisms: [...] (columns: Polymorphism, Polymorphism type, Association type, Significance, Research type, Link to details)
             for the gene: {gene} across different species?
             Make sure to include the whole list of SNPs, do not truncate it.
             If some information is not available in the base for this name of the gene try to find synonyms and find and fetch data for them.
             If this attempt also fails return "Info not available".
+
+            STRICTLY:
+            Do NOT include raw double quotes (") or backslashes (\) inside argument values. If a value contains them, **remove** these characters.
+            1) When constructing SQL-like conditions, use **single quotes** around values INSIDE the condition string. Example:  OK →  "Symbol = 'TERT'".  
+               The **value itself** must be a clean atom (e.g., TERT), never "'TERT'" or "\"TERT\"" or "TERT\"".
+            2) If you need LIKE, write the percent signs in the condition, not inside the value.  
+            3) Always call the tool 'final_answer' at the end
         """
 
 def set_user_prompt_fetch(link, gene):
@@ -148,10 +156,14 @@ def set_user_prompt_fetch(link, gene):
             URL: {link}
         """
 
+def sanitize(s: str) -> str:
+    return s.strip().replace('"', '').replace("'", "").replace("\\", "").replace("%", "")
+
+
 def run_query(
     gene,
-    model=set_model(),
-    trust_remote_code=True,
+    model=set_model(), 
+    trust_remote_code=True, 
     structured_output=False
 ):
     system_prompt = SYSTEM_PROMPT
@@ -164,7 +176,7 @@ def run_query(
         command="npx",
         args=["-y", "@just-every/mcp-read-website-fast"]
     )
-
+    
     with ToolCollection.from_mcp(
         server_parameters=server_opengenes,
         trust_remote_code=trust_remote_code,
@@ -192,12 +204,12 @@ def run_query(
             "links":
             [
                 {{
-                    "rsID": "<rsID>",
+                    "Polymorphism": "<Polymorphism ID>",
                     "link": "<link>"
                 }}    
             ]
         }}
-        Document: {opengenes_text}
+        Document: {sanitize(opengenes_text)}
         '''
     )
     web_array = []
@@ -213,9 +225,16 @@ def run_query(
                 add_base_tools=False,
                 max_steps=1,
             )
+            print('Fetching from URLs')
+            # with ThreadPoolExecutor(max_workers=min(8, len(links))) as ex:
+            #         futures = [
+            #             ex.submit(agent.run, set_user_prompt_fetch(link, gene))
+            #             for link in json.loads(links)['links']
+            #         ]
+            #         web_array = [f.result() for f in futures]
             for item in json.loads(links)['links']:
                 link = item['link']
                 web_array.append(agent.run(set_user_prompt_fetch(link, gene)))
-
+    
     return opengenes_text, web_array
 
