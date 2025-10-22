@@ -8,11 +8,10 @@ import json
 
 
 # config
-def set_server():
+def set_server(server_name="kegg-mcp-server"):
     server = StdioServerParameters(
-        command="node",
-        args=["/mnt/c/Users/Uniholder/Git/KEGG-MCP-Server/build/index.js", "stdio"],
-        cwd="/mnt/c/Users/Uniholder/Git/KEGG-MCP-Server"
+        command="docker",
+        args=["exec", "-i", server_name, "node", "/app/build/index.js"]
     )
     return server
 
