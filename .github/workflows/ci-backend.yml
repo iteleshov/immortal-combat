@@ -6,6 +6,8 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      SERVER: ${{ secrets.EC2_HOST }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
