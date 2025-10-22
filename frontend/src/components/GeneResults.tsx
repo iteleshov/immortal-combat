@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, ExternalLink, Download, FileText } from 'lucide-react'
+import { ChevronDown, ChevronRight, FileText } from 'lucide-react'
 import { GeneResponse } from '../types'
-import { exportToJSON, exportToPDF } from '../services/export'
+import { exportToJSON } from '../services/export'
 
 interface GeneResultsProps {
   gene: GeneResponse
@@ -24,21 +24,17 @@ export default function GeneResults({ gene }: GeneResultsProps) {
     exportToJSON(gene, `${gene.gene}_data`)
   }
 
-  const handleExportPDF = () => {
-    exportToPDF('gene-results', `${gene.gene}_report`)
-  }
-
-  const SectionHeader = ({ 
-    title, 
-    section, 
-    children 
-  }: { 
+  const SectionHeader = ({
+    title,
+    section,
+    children
+  }: {
     title: string
     section: string
-    children?: React.ReactNode 
+    children?: React.ReactNode
   }) => {
     const isExpanded = expandedSections.has(section)
-    
+
     return (
       <button
         onClick={() => toggleSection(section)}
@@ -57,10 +53,10 @@ export default function GeneResults({ gene }: GeneResultsProps) {
     )
   }
 
-  const SequenceDisplay = ({ 
-    sequence, 
+  const SequenceDisplay = ({
+    sequence,
     title
-  }: { 
+  }: {
     sequence?: string
     title: string
   }) => {
@@ -102,14 +98,17 @@ export default function GeneResults({ gene }: GeneResultsProps) {
               <FileText className="h-4 w-4 mr-2" />
               JSON
             </button>
-            <button
-              onClick={handleExportPDF}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              PDF
-            </button>
           </div>
+        </div>
+      </div>
+
+      {/* Analysis result */}
+      <div>
+        <SectionHeader title="Analysis result" section="analysis-result" />
+        <div className="p-6">
+          <p className="text-sm text-gray-900 leading-relaxed">
+            {gene.article}
+          </p>
         </div>
       </div>
 
@@ -193,37 +192,17 @@ export default function GeneResults({ gene }: GeneResultsProps) {
         <SectionHeader title="Sequences" section="sequences" />
         {expandedSections.has('sequences') && (
           <div className="p-6 space-y-6">
-            <SequenceDisplay 
-              sequence={gene.protein_sequence} 
+            <SequenceDisplay
+              sequence={gene.protein_sequence}
               title="Protein Sequence"
             />
-            <SequenceDisplay 
-              sequence={gene.dna_sequence} 
+            <SequenceDisplay
+              sequence={gene.dna_sequence}
               title="DNA Sequence"
             />
           </div>
         )}
       </div>
-
-      {/* Source */}
-      {gene.article && (
-        <div>
-          <SectionHeader title="Source" section="source" />
-          {expandedSections.has('source') && (
-            <div className="p-6">
-              <a
-                href={gene.article}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center text-sm text-primary-600 hover:text-primary-800"
-              >
-                View source article
-                <ExternalLink className="ml-1 h-4 w-4" />
-              </a>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   )
 }
