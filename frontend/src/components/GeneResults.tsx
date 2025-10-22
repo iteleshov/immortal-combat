@@ -38,7 +38,7 @@ export default function GeneResults({ gene }: GeneResultsProps) {
         onClick={() => toggleSection(section)}
         className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 border-b border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
       >
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-lg font-semibold text-gray-700">{title}</h3>
         <div className="flex items-center space-x-2">
           {children}
           {isExpanded ? (
@@ -111,7 +111,7 @@ export default function GeneResults({ gene }: GeneResultsProps) {
 
       {/* Analysis result */}
       <div>
-        <SectionHeader title="Analysis result" section="analysis-result" />
+        <h3 className="text-lg font-semibold text-gray-900">Analysis result</h3>
         <div className="prose prose-gray max-w-none p-6">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -123,8 +123,8 @@ export default function GeneResults({ gene }: GeneResultsProps) {
         </div>
       </div>
 
-      <div className="px-6 py-3 bg-gray-50 border-t border-b border-gray-200">
-        <h3 className="text-md font-semibold text-gray-700 uppercase tracking-wide">
+      <div className="px-6 py-3 border-t border-b border-gray-300">
+        <h3 className="text-md font-semibold text-gray-900 uppercase tracking-wide">
           Additional Data
         </h3>
       </div>
