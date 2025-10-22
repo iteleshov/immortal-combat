@@ -89,9 +89,10 @@ export default function SearchPage() {
             type="submit"
             disabled={loading || !searchTerm.trim()}
             className="w-full flex justify-center items-center px-4 py-3 border border-transparent
-                       rounded-md shadow-sm text-sm font-medium text-gray-700 bg-primary-600 hover:bg-primary-700
-                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50
-                       disabled:cursor-not-allowed cursor-pointer"
+                       rounded-md shadow-sm text-sm font-medium text-gray-700 bg-primary-600
+                       hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-offset-2
+                       focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer
+                       transition-colors duration-200"
           >
             {loading ? (
               <>
