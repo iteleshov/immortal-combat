@@ -1,0 +1,47 @@
+name: CI Backend Build & Push Docker Images to GHCR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build & Push Backend
+        run: |
+          docker build -t ghcr.io/iteleshov/backend:latest ./backend
+          docker push ghcr.io/iteleshov/backend:latest
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+
+          echo "${{ secrets.SERVER_SSH }}" > ~/.ssh/id_rsa
+
+          chmod 600 ~/.ssh/id_rsa
+          ssh-agent bash -c 'echo "SSH agent started" && ssh-add ~/.ssh/id_rsa'
+          ssh-keyscan -H $SERVER >> ~/.ssh/known_hosts
+
+      - name: Pull image
+        run: |
+          echo "Pulling the backend image..."
+          ssh ubuntu@$SERVER "docker compose pull backend"   
+
+      - name: Deploy image
+        run: |
+          echo "Deploying the backend image..."
+          ssh ubuntu@$SERVER "docker compose up -d backend --force-recreate"    
+
+      - name: Verify backend startup after deployment
+        run: |
+          ssh ubuntu@$SERVER "timeout 30s docker compose logs backend -f | grep -q ' Application startup complete.'"
