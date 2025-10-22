@@ -1,4 +1,4 @@
-# How to launch MCP server 
+# How to launch MCP server
 # https://github.com/Augmented-Nature/KEGG-MCP-Server
 
 from smolagents import ToolCollection, ToolCallingAgent, OpenAIServerModel
@@ -8,7 +8,6 @@ import json
 
 
 # config
-os.environ['NEBIUS_API_KEY'] = open('secret.txt', 'r').read().strip()
 def set_server():
     server = StdioServerParameters(
         command="node",
@@ -19,11 +18,11 @@ def set_server():
 
 
 def set_model(
-    api_key=os.environ["NEBIUS_API_KEY"], 
-    api_base="https://api.studio.nebius.com/v1/", 
+    api_key=os.environ["NEBIUS_API_KEY"],
+    api_base="https://api.studio.nebius.com/v1/",
     temperature=0,
     model_name="Qwen/Qwen3-235B-A22B-Instruct-2507"
-): 
+):
     model = OpenAIServerModel(
         model_id=model_name,
         api_key=api_key,

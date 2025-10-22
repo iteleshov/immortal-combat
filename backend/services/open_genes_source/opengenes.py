@@ -13,11 +13,11 @@ from bs4 import BeautifulSoup
 class ReadScholarlyByDOI(Tool):
     name = "read_scholarly_by_doi"
     description = (
-        "Читает статью по DOI. Приоритет: PubMed→PMC (open access). "
-        "Если PMC нет — возвращает абстракт с PubMed."
+        "Read article by DOI. Priority: PubMed→PMC (open access). "
+        "If PMC is absent — return abstract from PubMed."
     )
 
-    # 1) inputs — ключи должны совпадать с сигнатурой forward()
+    # 1) inputs — keys must match with signature forward()
     inputs = {
         "doi": {"type": "string", "required": True, "description": "Напр.: 10.1111/j.1474-9726.2009.00493.x"}
     }

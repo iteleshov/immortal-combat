@@ -5,13 +5,12 @@ import json
 
 
 # config
-os.environ['NEBIUS_API_KEY'] = open('secret.txt', 'r').read().strip()
 def set_model(
-    api_key=os.environ["NEBIUS_API_KEY"], 
-    api_base="https://api.studio.nebius.com/v1/", 
+    api_key=os.environ["NEBIUS_API_KEY"],
+    api_base="https://api.studio.nebius.com/v1/",
     temperature=0,
     model_name="Qwen/Qwen3-235B-A22B-Thinking-2507"
-): 
+):
     model = OpenAIServerModel(
         model_id=model_name,
         api_key=api_key,
