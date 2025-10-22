@@ -1,6 +1,6 @@
 services:
-  immortal-combat-backend:
-    container_name: immortal-combat-backend
+  backend:
+    container_name: backend
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -17,12 +17,12 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
       - NEBIUS_API_KEY=${NEBIUS_API_KEY}
-  immortal-combat-client:
+  frontend:
     build:
-      context: ./client
+      context: frontend
       dockerfile: Dockerfile
-    container_name: immortal-combat-frontend
+    container_name: frontend
     ports:
       - "3000:80"
     depends_on:
-      - immortal-combat-backend
+      - backend
