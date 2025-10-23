@@ -50,6 +50,14 @@ class KnowledgeBaseFacade:
             """, (gene_symbol, article))
             self.conn.commit()
 
+    def _load_from_db(self, gene_symbol: str) -> str | None:
+        with self.conn.cursor() as cur:
+            cur.execute(
+            "SELECT article FROM gene_articles WHERE gene_symbol = %s",
+            (gene_symbol,))
+        row = cur.fetchone()
+        return row[0] if row else None
+
     def _agentic_pipeline(self, gene_symbol: str) -> str:
         start = time.perf_counter()
         funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query, gnomad.run_query, ncbi_mcp.final_process]
@@ -84,15 +92,14 @@ class KnowledgeBaseFacade:
     def search(self, gene_symbol: str) -> GeneResponse:
         gene_symbol = gene_symbol.strip().upper()
 
-        # --- CACHE CHECK ---
         with self._cache_lock:
-            if gene_symbol in self._cache:
-                print(f"[CACHE HIT] {gene_symbol}")
-                article = self._cache[gene_symbol]
+            # --- DB CHECK ---
+            article = self._load_from_db(gene_symbol)
+            if article:
+                print(f"[DB HIT] {gene_symbol}")
             else:
-                print(f"[CACHE MISS] {gene_symbol}")
+                print(f"[CACHE & DB MISS] {gene_symbol}")
                 article = self._agentic_pipeline(gene_symbol)
-                self._cache[gene_symbol] = article
 
         # --- FETCH BASE DATA ---
         try:
