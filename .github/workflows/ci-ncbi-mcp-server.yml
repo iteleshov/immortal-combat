@@ -48,10 +48,14 @@ jobs:
         run: |
           ssh ubuntu@$SERVER "docker compose up -d ncbi-mcp-server --force-recreate"
 
+      - name: Verify opengenes-mcp-server startup after deployment
+        run: |
+          ssh ubuntu@$SERVER "timeout 10s docker compose logs opengenes-mcp-server -f | grep -q \"ЗАПУСК NCBI-Агента\""    
+
       - name: Verify ncbi-mcp-server is running
         run: |
           ssh ubuntu@$SERVER "
-            if docker ps --filter 'name=ncbi-mcp-server' --filter 'status=running' --format '{{.Names}}' | grep -q 'kegg-mcp-server'; then
+            if docker ps --filter 'name=ncbi-mcp-server' --filter 'status=running' --format '{{.Names}}' | grep -q 'ЗАПУСК NCBI-Агента'; then
               echo 'ncbi-mcp-server is running'
             else
               echo 'ncbi-mcp-server is NOT running'
