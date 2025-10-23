@@ -803,19 +803,6 @@ def get_element_attribute(element: ET.Element, tag: str, attribute: str) -> Opti
         return elem.get(attribute)
     return None
 
-SECRET_PATH = os.path.join(os.path.dirname(__file__), "secret.txt")
-NCBI_API_PATH = os.path.join(os.path.dirname(__file__), "NCBI_API_KEY.txt")
-
-with open(SECRET_PATH, "r", encoding="utf-8") as f:
-    api_key = f.read().strip()
-
-with open(NCBI_API_PATH, "r", encoding="utf-8") as f:
-    ncbi_api_key = f.read().strip()
-
-os.environ["NEBIUS_API_KEY"] = api_key
-os.environ['NCBI_API_KEY'] = 'e50f8d5c7b74c40109990f686c4422578707'
-os.environ['NCBI_EMAIL'] = "raitzev2004@gmail.com"
-
 def set_server_stdio():
     server_script_path = r"D:\PROGRAMMS\Python Projects\NCBI MCP\ncbi-mcp-server\ncbi_mcp_server\server.py"
     return StdioServerParameters(
