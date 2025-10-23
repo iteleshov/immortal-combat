@@ -19,7 +19,7 @@ def set_model(
     )
     return model
 
-def set_user_prompt(uniprot_output, kegg_output, opengenes_output, gnomad_output):
+def set_user_prompt(uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output):
     return f"""
 You are a bioinformatics summarization agent specialized in the **Longevity Sequence-to-Function Knowledge Base**.
 You will receive as input structured JSON outputs from next data sources:
@@ -152,6 +152,9 @@ OpenGenes data:
 gnomAD data:
 {gnomad_output}
 
+NCBI_MCP data:
+{ncbi_output}
+
 ---
 
 ### OUTPUT
@@ -159,7 +162,7 @@ Return only the final Markdown article.
 """
 
 def run_query(
-    uniprot_output, kegg_output, opengenes_output, gnomad_output
+    uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output
 ):
     agent = ToolCallingAgent(
         model=set_model(),
@@ -168,4 +171,4 @@ def run_query(
         max_steps=10,
     )
     # agent.prompt_templates["system_prompt"] = SYSTEM_PROMPT
-    return agent.run(set_user_prompt(uniprot_output, kegg_output, opengenes_output, gnomad_output))
+    return agent.run(set_user_prompt(uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output))
