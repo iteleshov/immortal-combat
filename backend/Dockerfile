@@ -28,5 +28,3 @@ COPY . .
 
 # Open port FastAPI
 EXPOSE 8000
-
-CMD ["uvx", "opengenes-mcp-server", "stdio"]
