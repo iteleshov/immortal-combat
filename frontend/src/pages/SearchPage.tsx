@@ -75,7 +75,7 @@ export default function SearchPage() {
                   setSearchTerm(e.target.value)
                   setValidationError('')
                 }}
-                placeholder="Enter gene name (e.g., NRF2, APOE, SOX2, OCT4)"
+                placeholder="Enter gene name (e.g., NFE2L2, APOE, SOX2, OCT4, NRF2)"
                 className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 disabled={loading}
               />
@@ -90,7 +90,7 @@ export default function SearchPage() {
             disabled={loading || !searchTerm.trim()}
             className="w-full flex justify-center items-center px-4 py-3 border border-transparent
                        rounded-md shadow-sm text-sm font-medium text-gray-700 bg-primary-600
-                       hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-offset-2
+                       hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2
                        focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer
                        transition-colors duration-200"
           >
@@ -145,7 +145,7 @@ export default function SearchPage() {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="text-lg font-medium text-blue-900 mb-3">Try these example genes:</h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {['NRF2', 'APOE', 'SOX2', 'OCT4'].map((gene) => (
+            {['NFE2L2', 'APOE', 'SOX2', 'OCT4'].map((gene) => (
               <button
                 key={gene}
                 onClick={() => {

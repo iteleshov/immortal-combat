@@ -19,21 +19,23 @@ class KnowledgeBaseFacade:
         self._cache_lock = threading.Lock()
 
     def _agentic_pipeline(self, gene_symbol: str) -> str:
-        """Run UniProt, KEGG, and OpenGenes in parallel and aggregate results."""
+        """Run UniProt, KEGG, gnomAD, NCBI and OpenGenes in parallel and aggregate results."""
         start = time.perf_counter()
-        funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query, gnomad.run_query]
+        funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query, gnomad.run_query, self.ncbi.fetch]
         results = [None] * len(funcs)
 
-        with ThreadPoolExecutor(max_workers=3) as ex:
+        with ThreadPoolExecutor(max_workers=len(funcs)) as ex:
             futures = {ex.submit(f, gene_symbol): i for i, f in enumerate(funcs)}
             for fut in as_completed(futures):
                 i = futures[fut]
                 try:
                     results[i] = fut.result()
+                except TimeoutError:
+                    results[i] = "Agent timed out"
                 except Exception as e:
                     results[i] = f"Agent failed: {e}"
 
-        uniprot_output, kegg_output, opengenes_output, gnomad_output = results
+        uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output = results
         try:
             article = agg.run_query(uniprot_output, kegg_output, opengenes_output, gnomad_output)
         except Exception as e:
@@ -63,22 +65,16 @@ class KnowledgeBaseFacade:
             print(f"UniProt fetch failed: {e}")
             u = {}
 
-        try:
-            n = self.ncbi.fetch(gene_symbol)
-        except Exception as e:
-            print(f"NCBI fetch failed: {e}")
-            n = {}
-
         resp = GeneResponse(
             gene=gene_symbol,
             function=u.get("function"),
             synonyms=u.get("synonyms") or [],
-            longevity_association=n.get("longevity_association"),
-            modification_effects=u.get("modification_effects"),
-            dna_sequence=n.get("dna_sequence"),
-            interval_in_dna_sequence=n.get("interval_in_dna_sequence"),
+            longevity_association=ncbi_output.get("longevity_association"),
+            modification_effects=ncbi_output.get("modification_effects"),
+            dna_sequence=ncbi_output.get("dna_sequence"),
+            interval_in_dna_sequence=ncbi_output.get("interval_in_dna_sequence"),
             protein_sequence=u.get("protein_sequence"),
             article=article,
-            externalLink=n.get('article') or u.get('article')
+            externalLink=ncbi_output.get('article') or u.get('article')
         )
         return resp
