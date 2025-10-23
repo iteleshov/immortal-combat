@@ -24,12 +24,14 @@ class KnowledgeBaseFacade:
         funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query, gnomad.run_query]
         results = [None] * len(funcs)
 
-        with ThreadPoolExecutor(max_workers=3) as ex:
+        with ThreadPoolExecutor(max_workers=len(funcs)) as ex:
             futures = {ex.submit(f, gene_symbol): i for i, f in enumerate(funcs)}
             for fut in as_completed(futures):
                 i = futures[fut]
                 try:
                     results[i] = fut.result()
+                except TimeoutError:
+                    results[i] = "Agent timed out"
                 except Exception as e:
                     results[i] = f"Agent failed: {e}"
 
