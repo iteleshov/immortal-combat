@@ -1,4 +1,4 @@
-name: CI Build & Deploy opengenes MCP Server
+name: CI Build & Deploy NCBI MCP Server
 
 on:
   workflow_dispatch:
