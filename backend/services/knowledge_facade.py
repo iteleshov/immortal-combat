@@ -7,20 +7,50 @@ from backend.services.ncbi_source import NcbiSource
 from backend.services.gnomad_source import gnomad
 from backend.services.ncbi_mcp_source import ncbi_mcp
 from backend.models.gene_response import GeneResponse
+import os
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
-
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import psycopg2
+from psycopg2.extras import execute_values
 
 class KnowledgeBaseFacade:
     def __init__(self):
+        self.conn = psycopg2.connect(
+            host=os.environ["PG_HOST"],
+            port=os.environ.get("PG_PORT", 5432),
+            dbname=os.environ["PG_DB"],
+            user=os.environ["PG_USER"],
+            password=os.environ["PG_PASSWORD"]
+        )
         self.uniprot = UniProtSource()
         self.ncbi = NcbiSource()
-        self._cache = {}              # gene_symbol -> article
+        self._cache = {}
         self._cache_lock = threading.Lock()
 
+        self._ensure_table()
+
+    def _ensure_table(self):
+        with self.conn.cursor() as cur:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS gene_articles (
+                gene_symbol TEXT PRIMARY KEY,
+                article TEXT
+            )
+            """)
+            self.conn.commit()
+
+    def _save_to_db(self, gene_symbol: str, article: str):
+        with self.conn.cursor() as cur:
+            cur.execute("""
+            INSERT INTO gene_articles (gene_symbol, article)
+            VALUES (%s, %s)
+            ON CONFLICT (gene_symbol) DO UPDATE
+            SET article = EXCLUDED.article
+            """, (gene_symbol, article))
+            self.conn.commit()
+
     def _agentic_pipeline(self, gene_symbol: str) -> str:
-        """Run UniProt, KEGG, gnomAD and OpenGenes in parallel and aggregate results."""
         start = time.perf_counter()
         funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query, gnomad.run_query, ncbi_mcp.final_process]
         results = [None] * len(funcs)
@@ -43,6 +73,9 @@ class KnowledgeBaseFacade:
             article = agg.run_query(uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output)
         except Exception as e:
             article = f"Article creation failed: {e}"
+
+        # сохраняем в PostgreSQL
+        self._save_to_db(gene_symbol, article)
 
         elapsed = time.perf_counter() - start
         print(f"Generated article for {gene_symbol} in {elapsed:.2f}s")
