@@ -804,7 +804,7 @@ def get_element_attribute(element: ET.Element, tag: str, attribute: str) -> Opti
     return None
 
 def set_server_stdio():
-    server_script_path = r"D:\PROGRAMMS\Python Projects\NCBI MCP\ncbi-mcp-server\ncbi_mcp_server\server.py"
+    server_script_path = r"server.py"
     return StdioServerParameters(
         command="python",
         args=[server_script_path],
