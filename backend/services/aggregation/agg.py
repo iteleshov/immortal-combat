@@ -26,6 +26,7 @@ You will receive as input structured JSON outputs from next data sources:
 - **UniProt MCP output** (protein sequence, domains, motifs, variants, PTMs)
 - **KEGG MCP output** (pathways, molecular functions, regulatory networks)
 - **OpenGenes MCP output** (longevity associations, interventions, model organism data)
+- **NCBI MCP output** (OMIM, Gene, RefSeq information for the gene/protein)
 - **gnomAD MCP output** (pathogenic and likely pathogenic gene variants with functional impact)
 
 ---
@@ -43,19 +44,21 @@ If any data source is missing, gracefully skip the section without placeholders.
 ## 🧬 1. Gene / Protein Overview
 - **Gene Symbol / Name:** from UniProt or KEGG
 - **Protein Name:** official name (UniProt)
-- **Identifiers:** UniProt ID, KEGG ID, Gene ID, HGNC ID, Ensembl ID (if available)
+- **Identifiers:** UniProt ID, KEGG ID, Gene ID (NCBI), HGNC ID, Ensembl ID, OMIM ID (MIM), RefSeqGene ID
 - **Organism:** Homo sapiens (unless otherwise specified)
 - **Sequence Links:**  
   - [Protein (UniProt)](link)  
-  - [DNA / mRNA (RefSeq or Ensembl)](link)
+  - [Protein (RefSeq)](link_to_NP_accession)
+  - [mRNA (RefSeq)](link_to_NM_accession)
+  - [Gene (RefSeqGene)](link_to_NG_accession)
 
 ---
 
 ## 🔬 2. Structure and Functional Domains
-- **Protein Length:** (e.g., 605 amino acids)
-- **Key Domains / Motifs:** (e.g., Neh1–Neh7 domains, bZIP region, ETGE/DLG motifs)
+- **Protein Length:** (e.g., 605 amino acids, from UniProt or NCBI RefSeq)
+- **Key Domains / Motifs:** (e.g., HMG-box, SOXp domain; summarized from UniProt, KEGG, and NCBI CDD)
 - **Functional Roles:** summarized from UniProt and KEGG functional annotations
-- **Post-Translational Modifications (PTMs):** phosphorylation, ubiquitination, etc.
+- **Post-Translational Modifications (PTMs):** phosphorylation, ubiquitination, methylation (summarized from UniProt and NCBI RefSeq), etc.
 - **Orthologs / Paralogs:** from KEGG or UniProt cross-refs; include species and % identity
 
 ---
@@ -66,11 +69,12 @@ If any data source is missing, gracefully skip the section without placeholders.
 | 16–32     | ETGE motif mutation | KEAP1 binding loss  | Constitutive NRF2 activation | UniProt |
 | 525–550   | Neh1 domain deletion | Loss of DNA binding | Reduced antioxidant response | Literature |
 
-- Use data from UniProt and KEGG to describe regions where amino acid changes or truncations alter protein function.
-- Highlight experimentally confirmed relationships (e.g., domain deletions, point mutations, or chimeric constructs).
+- Use data from UniProt, KEGG, and NCBI to describe regions where amino acid changes, **PTMs**, or truncations alter protein function.
+- Highlight experimentally confirmed relationships (e.g., domain deletions, point mutations, **post-translational modifications**, or chimeric constructs).
 
 ### 🧬 Clinically Significant Variants (gnomAD / ClinVar)
 Use **gnomAD** data to summarize variants classified as *Pathogenic*, *Likely pathogenic*, or *Pathogenic/Likely pathogenic* according to ClinVar.
+**Gene-Associated Diseases (OMIM / NCBI):** List primary associated diseases/phenotypes from NCBI (OMIM) (e.g., Anophthalmia/microphthalmia, SOX2 Disorder).
 For each variant, include:
 * **Variant ID / genomic position**
 * **Amino acid change (if applicable)**
@@ -152,7 +156,7 @@ OpenGenes data:
 gnomAD data:
 {gnomad_output}
 
-NCBI_MCP data:
+NCBI data:
 {ncbi_output}
 
 ---
