@@ -803,11 +803,10 @@ def get_element_attribute(element: ET.Element, tag: str, attribute: str) -> Opti
         return elem.get(attribute)
     return None
 
-def set_server_stdio():
-    server_script_path = r"server.py"
+def set_server_stdio(server_name="ncbi-mcp-server"):
     return StdioServerParameters(
         command="python",
-        args=[server_script_path],
+        args=[server_name, 'stdio'],
         env={
             "NCBI_API_KEY": os.environ.get("NCBI_API_KEY", ""),
             "NCBI_EMAIL": os.environ.get("NCBI_EMAIL", "")
