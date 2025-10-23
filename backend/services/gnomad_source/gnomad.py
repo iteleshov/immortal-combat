@@ -3,6 +3,7 @@
 from smolagents import ToolCollection, OpenAIServerModel, ToolCallingAgent
 from mcp import StdioServerParameters
 import os
+from backend.utils.alias_resolver import resolve_gene_alias_to_official 
 
 MODEL = "Qwen/Qwen3-235B-A22B-Thinking-2507"
 
@@ -54,8 +55,9 @@ def run_query(
         trust_remote_code=True,
         structured_output=False
 ):
+    prepared_gene_name = resolve_gene_alias_to_official(gene)
     system_prompt = SYSTEM_PROMPT
-    user_prompt = set_user_prompt(gene)
+    user_prompt = set_user_prompt(prepared_gene_name)
     with ToolCollection.from_mcp(
         server_parameters=server,
         trust_remote_code=trust_remote_code,
@@ -71,4 +73,3 @@ def run_query(
         result = agent.run(user_prompt)
 
     return result
-
