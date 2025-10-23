@@ -22,7 +22,7 @@ class KnowledgeBaseFacade:
     def _agentic_pipeline(self, gene_symbol: str) -> str:
         """Run UniProt, KEGG, gnomAD and OpenGenes in parallel and aggregate results."""
         start = time.perf_counter()
-        funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query, gnomad.run_query, ncbi_mcp.final_process]
+        funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query, gnomad.run_query, self.ncbi.fetch]
         results = [None] * len(funcs)
 
         with ThreadPoolExecutor(max_workers=len(funcs)) as ex:
