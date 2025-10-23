@@ -19,7 +19,7 @@ class KnowledgeBaseFacade:
         self._cache_lock = threading.Lock()
 
     def _agentic_pipeline(self, gene_symbol: str) -> str:
-        """Run UniProt, KEGG, and OpenGenes in parallel and aggregate results."""
+        """Run UniProt, KEGG, gnomAD and OpenGenes in parallel and aggregate results."""
         start = time.perf_counter()
         funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query, gnomad.run_query]
         results = [None] * len(funcs)
