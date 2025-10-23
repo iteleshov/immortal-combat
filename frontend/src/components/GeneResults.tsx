@@ -4,7 +4,7 @@ import { GeneResponse } from '../types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
-import logo from '../assets/gene-lens-logo.jpg'
+import logo from '../assets/gene-lens-logo.png'
 
 interface GeneResultsProps {
   gene: GeneResponse

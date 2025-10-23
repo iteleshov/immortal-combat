@@ -4,7 +4,7 @@ import { useAppSelector, useAppDispatch } from '../hooks'
 import { fetchGene, clearError } from '../store/searchSlice'
 import { validateGeneName } from '../services/api'
 import GeneResults from '../components/GeneResults'
-import logo from '../assets/gene-lens-logo.jpg'
+import logo from '../assets/gene-lens-logo.png'
 
 export default function SearchPage() {
   const dispatch = useAppDispatch()
