@@ -51,11 +51,10 @@ class KnowledgeBaseFacade:
             self.conn.commit()
 
     def _load_from_db(self, gene_symbol: str) -> str | None:
-        with self.conn.cursor() as cur:
-            cur.execute(
-            "SELECT article FROM gene_articles WHERE gene_symbol = %s",
-            (gene_symbol,))
+        cur = self.conn.cursor()
+        cur.execute("SELECT article FROM gene_articles WHERE gene_symbol = %s", (gene_symbol,))
         row = cur.fetchone()
+        cur.close()
         return row[0] if row else None
 
     def _agentic_pipeline(self, gene_symbol: str) -> str:
