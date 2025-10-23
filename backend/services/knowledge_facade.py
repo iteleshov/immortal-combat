@@ -35,6 +35,8 @@ class KnowledgeBaseFacade:
                     results[i] = "Agent timed out"
                 except Exception as e:
                     results[i] = f"Agent failed: {e}"
+                except SystemExit:
+                    results[i] = None
 
         uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output = results
         try:

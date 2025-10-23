@@ -1632,7 +1632,7 @@ def final_process(protein_name):
 
         if not gene_id:
             print("❌ Не удалось найти gene_id")
-            exit()
+            return None
 
         print(f"✅ Найден gene_id: {gene_id}")
 
