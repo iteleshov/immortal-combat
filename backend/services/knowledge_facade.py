@@ -58,7 +58,7 @@ class KnowledgeBaseFacade:
 
     def _agentic_pipeline(self, gene_symbol: str) -> str:
         start = time.perf_counter()
-        funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query, gnomad.run_query, ncbi_tool.run_query]
+        funcs = [ncbi_tool.run_query]
         results = [None] * len(funcs)
 
         with ThreadPoolExecutor(max_workers=len(funcs)) as ex:
@@ -74,13 +74,13 @@ class KnowledgeBaseFacade:
                 except SystemExit:
                     results[i] = None
 
-        uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output = results
+        ncbi_output = results
         try:
-            article = agg.run_query(uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output)
+            article = agg.run_query(ncbi_output)
         except Exception as e:
             article = f"Article creation failed: {e}"
 
-        # сохраняем в PostgreSQL
+        # save to PostgreSQL
         self._save_to_db(gene_symbol, article)
 
         elapsed = time.perf_counter() - start
