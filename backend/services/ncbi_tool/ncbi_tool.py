@@ -1810,6 +1810,3 @@ def run_query(protein_name):
         print(f"💥 Критическая ошибка: {e}")
         import traceback
         traceback.print_exc()
-
-if __name__ == "__main__":
-    final_process("NRF2")

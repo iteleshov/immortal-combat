@@ -58,6 +58,8 @@ class KnowledgeBaseFacade:
 
     def _agentic_pipeline(self, gene_symbol: str) -> str:
         start = time.perf_counter()
+        result = ncbi_tool.run_query(gene_symbol)
+        print(result)
         funcs = [ncbi_tool.run_query]
         results = [None] * len(funcs)
 
@@ -76,7 +78,7 @@ class KnowledgeBaseFacade:
 
         ncbi_output = results
         try:
-            article = agg.run_query(ncbi_output)
+            article = agg.run_query(result)
         except Exception as e:
             article = f"Article creation failed: {e}"
 
