@@ -809,7 +809,7 @@ def set_server_stdio(server_name="ncbi-tool"):
         args=[
             server_name,
             "stdio"
-            "run", "-i", "--rm",
+            "run", "-it", "--rm",
             "-e", f"NCBI_API_KEY={os.environ.get('NCBI_API_KEY', '')}",
             "-e", f"NCBI_EMAIL={os.environ.get('NCBI_EMAIL', '')}",
         ]
