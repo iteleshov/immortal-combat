@@ -1774,7 +1774,7 @@ def run_query(protein_name):
 
         # 7. Финальная обработка PubMed результатов
         print("🧹 Очистка и структурирование PubMed результатов...")
-        cleaned_pubmed = call_llm_directly(set_cleanup_results_prompt(all_pubmed_responses)).content
+        cleaned_pubmed = call_llm_directly(set_cleanup_results_prompt(all_pubmed_responses))
 
         # 8. Формирование финального отчета
         final_answer += f"\n=== ИНФОРМАЦИЯ ПО PUBMED ===\n"
