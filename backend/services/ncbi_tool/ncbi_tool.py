@@ -803,14 +803,15 @@ def get_element_attribute(element: ET.Element, tag: str, attribute: str) -> Opti
         return elem.get(attribute)
     return None
 
-def set_server_stdio():
+def set_server_stdio(server_name="ncbi-tool"):
     return StdioServerParameters(
         command="docker",
         args=[
+            server_name,
+            "stdio"
             "run", "-i", "--rm",
             "-e", f"NCBI_API_KEY={os.environ.get('NCBI_API_KEY', '')}",
             "-e", f"NCBI_EMAIL={os.environ.get('NCBI_EMAIL', '')}",
-            "ncbi-tool"
         ]
     )
 
