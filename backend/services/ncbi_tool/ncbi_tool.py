@@ -803,14 +803,15 @@ def get_element_attribute(element: ET.Element, tag: str, attribute: str) -> Opti
         return elem.get(attribute)
     return None
 
-def set_server_stdio(server_name="ncbi_mcp_server"):
+def set_server_stdio():
     return StdioServerParameters(
         command="docker",
-        args=["exec", "-i", server_name, "python", "/app/ncbi_mcp_server/server.py"],
-        env={
-            "NCBI_API_KEY": os.environ.get("NCBI_API_KEY", ""),
-            "NCBI_EMAIL": os.environ.get("NCBI_EMAIL", "")
-        }
+        args=[
+            "run", "-i", "--rm",
+            "-e", f"NCBI_API_KEY={os.environ.get('NCBI_API_KEY', '')}",
+            "-e", f"NCBI_EMAIL={os.environ.get('NCBI_EMAIL', '')}",
+            "ncbi-tool"
+        ]
     )
 
 def set_model():
@@ -1617,7 +1618,7 @@ def extract_pmids_from_text(text: str) -> Set[str]:
     pmids.update(matches)
     return pmids
 
-def final_process(protein_name):
+def run_query(protein_name):
     print("🚀 ЗАПУСК NCBI-Агента")
     try:
         # 1. Получаем gene_id
@@ -1802,6 +1803,7 @@ def final_process(protein_name):
         print(f"📊 Найдено статей: {len(all_found_pmids)}")
         print(f"🔬 Обработано белков: {len(proteins)}")
         print("=" * 50)
+        return final_answer
 
     except Exception as e:
         print(f"💥 Критическая ошибка: {e}")

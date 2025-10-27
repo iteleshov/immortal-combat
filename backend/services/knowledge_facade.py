@@ -5,14 +5,13 @@ from backend.services.open_genes_source import opengenes
 from backend.services.uniprot_source import UniProtSource
 from backend.services.ncbi_source import NcbiSource
 from backend.services.gnomad_source import gnomad
-from backend.services.ncbi_mcp_source import ncbi_mcp
+from backend.services.ncbi_tool import ncbi_tool
 from backend.models.gene_response import GeneResponse
 import os
 import time
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import psycopg2
-from psycopg2.extras import execute_values
 
 class KnowledgeBaseFacade:
     def __init__(self):
@@ -59,7 +58,7 @@ class KnowledgeBaseFacade:
 
     def _agentic_pipeline(self, gene_symbol: str) -> str:
         start = time.perf_counter()
-        funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query, gnomad.run_query, ncbi_mcp.final_process]
+        funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query, gnomad.run_query, ncbi_tool.run_query]
         results = [None] * len(funcs)
 
         with ThreadPoolExecutor(max_workers=len(funcs)) as ex:
