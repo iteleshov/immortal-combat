@@ -7,6 +7,7 @@ from backend.services.ncbi_source import NcbiSource
 from backend.services.gnomad_source import gnomad
 from backend.services.ncbi_mcp_server import ncbi_mcp_server
 from backend.models.gene_response import GeneResponse
+import hashlib
 import os
 import time
 import threading
@@ -58,73 +59,110 @@ class KnowledgeBaseFacade:
 
     def _agentic_pipeline(self, gene_symbol: str) -> str:
         start = time.perf_counter()
-        funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query, gnomad.run_query, ncbi_mcp_server.run_query]
-        results = [None] * len(funcs)
 
-        with ThreadPoolExecutor(max_workers=len(funcs)) as ex:
-            futures = {ex.submit(f, gene_symbol): i for i, f in enumerate(funcs)}
-            for fut in as_completed(futures):
-                i = futures[fut]
+        key = int(hashlib.sha256(gene_symbol.encode()).hexdigest(), 16) % (2**31)
+
+        with self.conn.cursor() as cur:
+            cur.execute("SELECT pg_try_advisory_lock(%s)", (key,))
+            locked = cur.fetchone()[0]
+
+            if not locked:
+                print(f"[LOCK] Another process is already generating article for {gene_symbol}")
+                return f"Article generation for {gene_symbol} is already in progress."
+
+            try:
+                funcs = [
+                    uniprot.run_query,
+                    kegg.run_query,
+                    opengenes.run_query,
+                    gnomad.run_query,
+                    ncbi_mcp_server.run_query
+                ]
+                results = [None] * len(funcs)
+
+                with ThreadPoolExecutor(max_workers=len(funcs)) as ex:
+                    futures = {ex.submit(f, gene_symbol): i for i, f in enumerate(funcs)}
+                    for fut in as_completed(futures):
+                        i = futures[fut]
+                        try:
+                            results[i] = fut.result()
+                        except TimeoutError:
+                            results[i] = "Agent timed out"
+                        except Exception as e:
+                            results[i] = f"Agent failed: {e}"
+                        except SystemExit:
+                            results[i] = None
+
+                uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output = results
+
                 try:
-                    results[i] = fut.result()
-                except TimeoutError:
-                    results[i] = "Agent timed out"
+                    article = agg.run_query(
+                        uniprot_output,
+                        kegg_output,
+                        opengenes_output,
+                        gnomad_output,
+                        ncbi_output
+                    )
                 except Exception as e:
-                    results[i] = f"Agent failed: {e}"
-                except SystemExit:
-                    results[i] = None
+                    article = f"Article creation failed: {e}"
 
-        uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output = results
-        try:
-            article = agg.run_query(uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output)
-        except Exception as e:
-            article = f"Article creation failed: {e}"
+                self._save_to_db(gene_symbol, article)
 
-        # save to PostgreSQL
-        self._save_to_db(gene_symbol, article)
+            finally:
+                cur.execute("SELECT pg_advisory_unlock(%s)", (key,))
+                self.conn.commit()
 
         elapsed = time.perf_counter() - start
         print(f"Generated article for {gene_symbol} in {elapsed:.2f}s")
         return article
 
-def search(self, gene_symbol: str) -> GeneResponse:
-    gene_symbol = gene_symbol.strip().upper()
+    def search(self, gene_symbol: str) -> GeneResponse:
+        gene_symbol = gene_symbol.strip().upper()
 
-    with self._cache_lock:
-        # --- DB CHECK ---
-        article = self._load_from_db(gene_symbol)
-        if article:
-            # --- FETCH BASE DATA ---
-            try:
-                u = self.uniprot.fetch(gene_symbol)
-            except Exception as e:
-                print(f"UniProt fetch failed: {e}")
-                u = {}
-            try:
-                n = self.ncbi.fetch(gene_symbol)
-            except Exception as e:
-                print(f"NCBI fetch failed: {e}")
-                n = {}
-            print(f"[DB HIT] {gene_symbol}")
+        with self._cache_lock:
+            # --- DB CHECK ---
+            article = self._load_from_db(gene_symbol)
+            if article:
+                # --- FETCH BASE DATA ---
+                try:
+                    u = self.uniprot.fetch(gene_symbol)
+                except Exception as e:
+                    print(f"UniProt fetch failed: {e}")
+                    u = {}
 
+                try:
+                    n = self.ncbi.fetch(gene_symbol)
+                except Exception as e:
+                    print(f"NCBI fetch failed: {e}")
+                    n = {}
+                print(f"[DB HIT] {gene_symbol}")
+
+                return GeneResponse(
+                    gene=gene_symbol,
+                    article=article,
+                    status="ready",
+                    function=u.get("function"),
+                    synonyms=u.get("synonyms") or [],
+                    longevity_association=n.get("longevity_association"),
+                    modification_effects=u.get("modification_effects"),
+                    dna_sequence=n.get("dna_sequence"),
+                    interval_in_dna_sequence=n.get("interval_in_dna_sequence"),
+                    protein_sequence=u.get("protein_sequence"),
+                    externalLink=n.get('article') or u.get('article')
+                )
+
+            # Если в БД нет статьи — запустить асинхронно и вернуть сообщение пользователю
+            print(f"[CACHE & DB MISS] {gene_symbol}")
+
+            # Фон: запускаем пайплайн без ожидания результата
+            threading.Thread(target=self._agentic_pipeline, args=(gene_symbol,), daemon=True).start()
+
+            # Немедленный ответ пользователю
             return GeneResponse(
                 gene=gene_symbol,
-                article=article,
-                status="ready"
+                article=(
+                    "Your request has been received and is being processed. "
+                    "This may take up to one hour. Please check back later."
+                ),
+                status="processing"
             )
-
-        # Если в БД нет статьи — запустить асинхронно и вернуть сообщение пользователю
-        print(f"[CACHE & DB MISS] {gene_symbol}")
-
-        # Фон: запускаем пайплайн без ожидания результата
-        threading.Thread(target=self._agentic_pipeline, args=(gene_symbol,), daemon=True).start()
-
-        # Немедленный ответ пользователю
-        return GeneResponse(
-            gene=gene_symbol,
-            article=(
-                "Your request has been received and is being processed. "
-                "This may take up to one hour. Please check back later."
-            ),
-            status="processing"
-        )
