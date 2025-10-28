@@ -87,41 +87,44 @@ class KnowledgeBaseFacade:
         print(f"Generated article for {gene_symbol} in {elapsed:.2f}s")
         return article
 
-    def search(self, gene_symbol: str) -> GeneResponse:
-        gene_symbol = gene_symbol.strip().upper()
+def search(self, gene_symbol: str) -> GeneResponse:
+    gene_symbol = gene_symbol.strip().upper()
 
-        with self._cache_lock:
-            # --- DB CHECK ---
-            article = self._load_from_db(gene_symbol)
-            if article:
-                print(f"[DB HIT] {gene_symbol}")
-            else:
-                print(f"[CACHE & DB MISS] {gene_symbol}")
-                article = self._agentic_pipeline(gene_symbol)
+    with self._cache_lock:
+        # --- DB CHECK ---
+        article = self._load_from_db(gene_symbol)
+        if article:
+            # --- FETCH BASE DATA ---
+            try:
+                u = self.uniprot.fetch(gene_symbol)
+            except Exception as e:
+                print(f"UniProt fetch failed: {e}")
+                u = {}
+            try:
+                n = self.ncbi.fetch(gene_symbol)
+            except Exception as e:
+                print(f"NCBI fetch failed: {e}")
+                n = {}
+            print(f"[DB HIT] {gene_symbol}")
 
-        # --- FETCH BASE DATA ---
-        try:
-            u = self.uniprot.fetch(gene_symbol)
-        except Exception as e:
-            print(f"UniProt fetch failed: {e}")
-            u = {}
+            return GeneResponse(
+                gene=gene_symbol,
+                article=article,
+                status="ready"
+            )
 
-        try:
-            n = self.ncbi.fetch(gene_symbol)
-        except Exception as e:
-            print(f"NCBI fetch failed: {e}")
-            n = {}
+        # Если в БД нет статьи — запустить асинхронно и вернуть сообщение пользователю
+        print(f"[CACHE & DB MISS] {gene_symbol}")
 
-        resp = GeneResponse(
+        # Фон: запускаем пайплайн без ожидания результата
+        threading.Thread(target=self._agentic_pipeline, args=(gene_symbol,), daemon=True).start()
+
+        # Немедленный ответ пользователю
+        return GeneResponse(
             gene=gene_symbol,
-            function=u.get("function"),
-            synonyms=u.get("synonyms") or [],
-            longevity_association=n.get("longevity_association"),
-            modification_effects=u.get("modification_effects"),
-            dna_sequence=n.get("dna_sequence"),
-            interval_in_dna_sequence=n.get("interval_in_dna_sequence"),
-            protein_sequence=u.get("protein_sequence"),
-            article=article,
-            externalLink=n.get('article') or u.get('article')
+            article=(
+                "Your request has been received and is being processed. "
+                "This may take up to one hour. Please check back later."
+            ),
+            status="processing"
         )
-        return resp

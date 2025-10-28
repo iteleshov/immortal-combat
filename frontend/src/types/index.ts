@@ -1,5 +1,6 @@
 export interface GeneResponse {
   gene: string;
+  status: string | 'ready' | 'processing';
   function?: string;
   synonyms: string[];
   longevity_association?: string;

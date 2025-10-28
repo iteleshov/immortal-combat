@@ -76,6 +76,20 @@ export default function GeneResults({ gene }: GeneResultsProps) {
     )
   }
 
+  if (gene.status === 'processing') {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          Processing your request
+        </h2>
+        <p className="text-gray-600">
+          Your query for <strong>{gene.gene}</strong> is being processed.
+          This may take up to one hour. Please check back later.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div id="gene-results" className="bg-white rounded-lg shadow-sm border">
       {/* Header */}
