@@ -88,169 +88,169 @@ export default function GeneResults({ gene }: GeneResultsProps) {
         </p>
       </div>
     )
-  }
-
-  return (
-    <div id="gene-results" className="bg-white rounded-lg shadow-sm border">
-      {/* Header */}
-      <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <img src={logo} alt="GeneLens logo" className="w-10 h-10 object-contain rounded" />
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">{gene.gene}</h2>
-            {gene.synonyms?.length > 0 && (
-              <p>Also known as: {gene.synonyms.join(', ')}</p>
-            )}
+  } else if (gene.status === 'ready') {
+    return (
+      <div id="gene-results" className="bg-white rounded-lg shadow-sm border">
+        {/* Header */}
+        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <img src={logo} alt="GeneLens logo" className="w-10 h-10 object-contain rounded" />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">{gene.gene}</h2>
+              {gene.synonyms?.length > 0 && (
+                <p>Also known as: {gene.synonyms.join(', ')}</p>
+              )}
+            </div>
           </div>
-        </div>
 
-        <button
-          onClick={() => {
-            const blob = new Blob([gene.article!!], { type: 'text/plain;charset=utf-8' })
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `${gene.gene}.md`
-            document.body.appendChild(a)
-            a.click()
-            document.body.removeChild(a)
-            URL.revokeObjectURL(url)
-          }}
-          className="inline-flex items-center px-3 py-2 border border-gray-300
+          <button
+            onClick={() => {
+              const blob = new Blob([gene.article!!], { type: 'text/plain;charset=utf-8' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `${gene.gene}.md`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              URL.revokeObjectURL(url)
+            }}
+            className="inline-flex items-center px-3 py-2 border border-gray-300
                      shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700
                      bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2
                      focus:ring-primary-500 cursor-pointer"
-        >
-          <FileText className="h-4 w-4 mr-2" />
-          Download
-        </button>
-      </div>
-
-      {/* Analysis result */}
-      <div>
-        <div className="prose prose-gray max-w-none p-6">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw]}
-            className="text-sm leading-relaxed text-gray-900"
           >
-            {gene.article}
-          </ReactMarkdown>
+            <FileText className="h-4 w-4 mr-2" />
+            Download
+          </button>
         </div>
-      </div>
 
-      {/* Divider: Additional Data */}
-      <div className="px-6 py-3 border-t border-b border-gray-300 bg-transparent">
-        <h3 className="text-md font-semibold text-gray-900 uppercase tracking-wide">
-          Additional Data
-        </h3>
-      </div>
+        {/* Analysis result */}
+        <div>
+          <div className="prose prose-gray max-w-none p-6">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              className="text-sm leading-relaxed text-gray-900"
+            >
+              {gene.article}
+            </ReactMarkdown>
+          </div>
+        </div>
 
-      {/* Basic Information */}
-      <div>
-        <SectionHeader title="Basic Information" section="basic" />
-        {expandedSections.has('basic') && (
-          <div className="p-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Gene Symbol</label>
-                <p className="mt-1 text-sm text-gray-900">{gene.gene}</p>
+        {/* Divider: Additional Data */}
+        <div className="px-6 py-3 border-t border-b border-gray-300 bg-transparent">
+          <h3 className="text-md font-semibold text-gray-900 uppercase tracking-wide">
+            Additional Data
+          </h3>
+        </div>
+
+        {/* Basic Information */}
+        <div>
+          <SectionHeader title="Basic Information" section="basic" />
+          {expandedSections.has('basic') && (
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Gene Symbol</label>
+                  <p className="mt-1 text-sm text-gray-900">{gene.gene}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Synonyms</label>
+                  <p className="mt-1 text-sm text-gray-900">{gene.synonyms.join(', ') || 'None'}</p>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Synonyms</label>
-                <p className="mt-1 text-sm text-gray-900">{gene.synonyms.join(', ') || 'None'}</p>
-              </div>
+              {gene.interval_in_dna_sequence && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">DNA Sequence Interval</label>
+                  <p className="mt-1 text-sm text-gray-900">
+                    Positions {gene.interval_in_dna_sequence[0]} - {gene.interval_in_dna_sequence[1]}
+                  </p>
+                </div>
+              )}
             </div>
-            {gene.interval_in_dna_sequence && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700">DNA Sequence Interval</label>
-                <p className="mt-1 text-sm text-gray-900">
-                  Positions {gene.interval_in_dna_sequence[0]} - {gene.interval_in_dna_sequence[1]}
-                </p>
+          )}
+        </div>
+
+        {/* Function */}
+        <div>
+          <SectionHeader title="Function" section="function" />
+          {expandedSections.has('function') && (
+            <div className="p-6">
+              <p className="text-sm text-gray-900 leading-relaxed">
+                {gene.function || 'No function information available.'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Longevity Association */}
+        <div>
+          <SectionHeader title="Longevity Association" section="longevity" />
+          {expandedSections.has('longevity') && (
+            <div className="p-6">
+              <p className="text-sm text-gray-900 leading-relaxed">
+                {gene.longevity_association || 'No longevity association information available.'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Modification Effects */}
+        <div>
+          <SectionHeader title="Modification Effects" section="modifications" />
+          {expandedSections.has('modifications') && (
+            <div className="p-6">
+              <p className="text-sm text-gray-900 leading-relaxed">
+                {gene.modification_effects || 'No modification effects information available.'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Evolutionary Conservation */}
+        <div>
+          <SectionHeader title="Evolutionary Conservation" section="evolution" />
+          {expandedSections.has('evolution') && (
+            <div className="p-6">
+              <p className="text-sm text-gray-900 leading-relaxed">
+                {gene.contribution_of_evolution || 'No evolutionary conservation information available.'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Sequences */}
+        <div>
+          <SectionHeader title="Sequences" section="sequences" />
+          {expandedSections.has('sequences') && (
+            <div className="p-6 space-y-6">
+              <SequenceDisplay sequence={gene.protein_sequence} title="Protein Sequence" />
+              <SequenceDisplay sequence={gene.dna_sequence} title="DNA Sequence" />
+            </div>
+          )}
+        </div>
+
+        {/* Source */}
+        {gene.externalLink && gene.externalLink.trim() !== '' && (
+          <div>
+            <SectionHeader title="Source" section="source" />
+            {expandedSections.has('source') && (
+              <div className="p-6">
+                <a
+                  href={gene.externalLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-sm text-primary-600 hover:text-primary-800"
+                >
+                  View source article
+                  <ExternalLink className="ml-1 h-4 w-4" />
+                </a>
               </div>
             )}
           </div>
         )}
       </div>
-
-      {/* Function */}
-      <div>
-        <SectionHeader title="Function" section="function" />
-        {expandedSections.has('function') && (
-          <div className="p-6">
-            <p className="text-sm text-gray-900 leading-relaxed">
-              {gene.function || 'No function information available.'}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Longevity Association */}
-      <div>
-        <SectionHeader title="Longevity Association" section="longevity" />
-        {expandedSections.has('longevity') && (
-          <div className="p-6">
-            <p className="text-sm text-gray-900 leading-relaxed">
-              {gene.longevity_association || 'No longevity association information available.'}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Modification Effects */}
-      <div>
-        <SectionHeader title="Modification Effects" section="modifications" />
-        {expandedSections.has('modifications') && (
-          <div className="p-6">
-            <p className="text-sm text-gray-900 leading-relaxed">
-              {gene.modification_effects || 'No modification effects information available.'}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Evolutionary Conservation */}
-      <div>
-        <SectionHeader title="Evolutionary Conservation" section="evolution" />
-        {expandedSections.has('evolution') && (
-          <div className="p-6">
-            <p className="text-sm text-gray-900 leading-relaxed">
-              {gene.contribution_of_evolution || 'No evolutionary conservation information available.'}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Sequences */}
-      <div>
-        <SectionHeader title="Sequences" section="sequences" />
-        {expandedSections.has('sequences') && (
-          <div className="p-6 space-y-6">
-            <SequenceDisplay sequence={gene.protein_sequence} title="Protein Sequence" />
-            <SequenceDisplay sequence={gene.dna_sequence} title="DNA Sequence" />
-          </div>
-        )}
-      </div>
-
-      {/* Source */}
-      {gene.externalLink && gene.externalLink.trim() !== '' && (
-        <div>
-          <SectionHeader title="Source" section="source" />
-          {expandedSections.has('source') && (
-            <div className="p-6">
-              <a
-                href={gene.externalLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center text-sm text-primary-600 hover:text-primary-800"
-              >
-                View source article
-                <ExternalLink className="ml-1 h-4 w-4" />
-              </a>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
+    )
+  }
 }
