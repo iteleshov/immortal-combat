@@ -120,6 +120,8 @@ export default function GeneResults({ gene }: GeneResultsProps) {
                      shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700
                      bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2
                      focus:ring-primary-500 cursor-pointer"
+          disabled={gene.status !== 'ready'}
+          hidden={gene.status !== 'ready'}
         >
           <FileText className="h-4 w-4 mr-2" />
           Download
