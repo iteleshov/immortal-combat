@@ -11,50 +11,50 @@ import os
 import time
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import psycopg2
+# import psycopg2
 
 class KnowledgeBaseFacade:
     def __init__(self):
-        self.conn = psycopg2.connect(
-            host=os.environ["PG_HOST"],
-            port=os.environ.get("PG_PORT", 5432),
-            dbname=os.environ["PG_DB"],
-            user=os.environ["PG_USER"],
-            password=os.environ["PG_PASSWORD"]
-        )
+    #     self.conn = psycopg2.connect(
+    #         host=os.environ["PG_HOST"],
+    #         port=os.environ.get("PG_PORT", 5432),
+    #         dbname=os.environ["PG_DB"],
+    #         user=os.environ["PG_USER"],
+    #         password=os.environ["PG_PASSWORD"]
+    #     )
         self.uniprot = UniProtSource()
         self.ncbi = NcbiSource()
         self._cache = {}
         self._cache_lock = threading.Lock()
+    #
+    #     self._ensure_table()
 
-        self._ensure_table()
+    # def _ensure_table(self):
+    #     with self.conn.cursor() as cur:
+    #         cur.execute("""
+    #         CREATE TABLE IF NOT EXISTS gene_articles (
+    #             gene_symbol TEXT PRIMARY KEY,
+    #             article TEXT
+    #         )
+    #         """)
+    #         self.conn.commit()
+    #
+    # def _save_to_db(self, gene_symbol: str, article: str):
+    #     with self.conn.cursor() as cur:
+    #         cur.execute("""
+    #         INSERT INTO gene_articles (gene_symbol, article)
+    #         VALUES (%s, %s)
+    #         ON CONFLICT (gene_symbol) DO UPDATE
+    #         SET article = EXCLUDED.article
+    #         """, (gene_symbol, article))
+    #         self.conn.commit()
 
-    def _ensure_table(self):
-        with self.conn.cursor() as cur:
-            cur.execute("""
-            CREATE TABLE IF NOT EXISTS gene_articles (
-                gene_symbol TEXT PRIMARY KEY,
-                article TEXT
-            )
-            """)
-            self.conn.commit()
-
-    def _save_to_db(self, gene_symbol: str, article: str):
-        with self.conn.cursor() as cur:
-            cur.execute("""
-            INSERT INTO gene_articles (gene_symbol, article)
-            VALUES (%s, %s)
-            ON CONFLICT (gene_symbol) DO UPDATE
-            SET article = EXCLUDED.article
-            """, (gene_symbol, article))
-            self.conn.commit()
-
-    def _load_from_db(self, gene_symbol: str) -> str | None:
-        cur = self.conn.cursor()
-        cur.execute("SELECT article FROM gene_articles WHERE gene_symbol = %s", (gene_symbol,))
-        row = cur.fetchone()
-        cur.close()
-        return row[0] if row else None
+    # def _load_from_db(self, gene_symbol: str) -> str | None:
+    #     cur = self.conn.cursor()
+    #     cur.execute("SELECT article FROM gene_articles WHERE gene_symbol = %s", (gene_symbol,))
+    #     row = cur.fetchone()
+    #     cur.close()
+    #     return row[0] if row else None
 
     def _agentic_pipeline(self, gene_symbol: str) -> str:
         start = time.perf_counter()
@@ -83,7 +83,7 @@ class KnowledgeBaseFacade:
             article = f"Article creation failed: {e}"
 
         # save to PostgreSQL
-        self._save_to_db(gene_symbol, article)
+        # self._save_to_db(gene_symbol, article)
 
         elapsed = time.perf_counter() - start
         print(f"Generated article for {gene_symbol} in {elapsed:.2f}s")
@@ -91,15 +91,16 @@ class KnowledgeBaseFacade:
 
     def search(self, gene_symbol: str) -> GeneResponse:
         gene_symbol = gene_symbol.strip().upper()
-
-        with self._cache_lock:
+        result = ncbi_tool.run_query(gene_symbol)
+        print(result)
+        # with self._cache_lock:
             # --- DB CHECK ---
-            article = self._load_from_db(gene_symbol)
-            if article:
-                print(f"[DB HIT] {gene_symbol}")
-            else:
-                print(f"[CACHE & DB MISS] {gene_symbol}")
-                article = self._agentic_pipeline(gene_symbol)
+            # article = self._load_from_db(gene_symbol)
+            # if article:
+            #     print(f"[DB HIT] {gene_symbol}")
+            # else:
+            #     print(f"[CACHE & DB MISS] {gene_symbol}")
+            #     article = self._agentic_pipeline(gene_symbol)
 
         # --- FETCH BASE DATA ---
         try:
@@ -116,14 +117,6 @@ class KnowledgeBaseFacade:
 
         resp = GeneResponse(
             gene=gene_symbol,
-            function=u.get("function"),
-            synonyms=u.get("synonyms") or [],
-            longevity_association=n.get("longevity_association"),
-            modification_effects=u.get("modification_effects"),
-            dna_sequence=n.get("dna_sequence"),
-            interval_in_dna_sequence=n.get("interval_in_dna_sequence"),
-            protein_sequence=u.get("protein_sequence"),
-            article=article,
-            externalLink=n.get('article') or u.get('article')
+            article=result,
         )
         return resp

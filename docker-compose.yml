@@ -17,6 +17,8 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
       - NEBIUS_API_KEY=${NEBIUS_API_KEY}
+    networks:
+      - app
   frontend:
     build:
       context: frontend
@@ -26,3 +28,30 @@ services:
       - "3000:80"
     depends_on:
       - backend
+    networks:
+      - app
+  postgres:
+    image: postgres:15
+    container_name: postgres-immortal-combat
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: opengenes
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - "5432:5432"
+    mem_limit: 512m
+    command: [
+      "postgres",
+      "-c", "shared_buffers=128MB",
+      "-c", "work_mem=4MB",
+      "-c", "maintenance_work_mem=64MB",
+      "-c", "effective_cache_size=256MB"
+    ]
+    volumes:
+      - ./volumes/postgres-data:/var/lib/postgresql/data
+    networks:
+      - app
+networks:
+  app:
+    driver: bridge

@@ -1,0 +1,6 @@
+mcp[cli]>=1.1.0
+httpx>=0.25.0
+biopython>=1.81
+xmltodict>=0.13.0
+pydantic>=2.0.0
+mcp>=1.0.0
