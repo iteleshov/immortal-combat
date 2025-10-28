@@ -81,7 +81,7 @@ class KnowledgeBaseFacade:
             article = f"Article creation failed: {e}"
 
         # save to PostgreSQL
-        # self._save_to_db(gene_symbol, article)
+        self._save_to_db(gene_symbol, article)
 
         elapsed = time.perf_counter() - start
         print(f"Generated article for {gene_symbol} in {elapsed:.2f}s")
