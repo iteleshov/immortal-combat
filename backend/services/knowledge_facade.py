@@ -5,7 +5,7 @@ from backend.services.open_genes_source import opengenes
 from backend.services.uniprot_source import UniProtSource
 from backend.services.ncbi_source import NcbiSource
 from backend.services.gnomad_source import gnomad
-from backend.services.ncbi_tool import ncbi_tool
+from backend.services.ncbi_mcp_server import ncbi_mcp_server
 from backend.models.gene_response import GeneResponse
 import os
 import time
@@ -58,9 +58,7 @@ class KnowledgeBaseFacade:
 
     def _agentic_pipeline(self, gene_symbol: str) -> str:
         start = time.perf_counter()
-        result = ncbi_tool.run_query(gene_symbol)
-        print(result)
-        funcs = [ncbi_tool.run_query]
+        funcs = [uniprot.run_query, kegg.run_query, opengenes.run_query, gnomad.run_query, ncbi_mcp_server.run_query]
         results = [None] * len(funcs)
 
         with ThreadPoolExecutor(max_workers=len(funcs)) as ex:
@@ -76,9 +74,9 @@ class KnowledgeBaseFacade:
                 except SystemExit:
                     results[i] = None
 
-        ncbi_output = results
+        uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output = results
         try:
-            article = agg.run_query(result)
+            article = agg.run_query(uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output)
         except Exception as e:
             article = f"Article creation failed: {e}"
 
@@ -91,8 +89,6 @@ class KnowledgeBaseFacade:
 
     def search(self, gene_symbol: str) -> GeneResponse:
         gene_symbol = gene_symbol.strip().upper()
-        result = ncbi_tool.run_query(gene_symbol)
-        print(result)
         # with self._cache_lock:
             # --- DB CHECK ---
             # article = self._load_from_db(gene_symbol)
