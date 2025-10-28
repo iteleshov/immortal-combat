@@ -1,3 +1,11 @@
+import hashlib
+import os
+import time
+import threading
+from queue import Queue, Empty
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import psycopg2
+
 from backend.services.aggregation import agg
 from backend.services.mcp_uniprot_source import uniprot
 from backend.services.kegg_source import kegg
@@ -7,12 +15,6 @@ from backend.services.ncbi_source import NcbiSource
 from backend.services.gnomad_source import gnomad
 from backend.services.ncbi_mcp_server import ncbi_mcp_server
 from backend.models.gene_response import GeneResponse
-import hashlib
-import os
-import time
-import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import psycopg2
 
 class KnowledgeBaseFacade:
     def __init__(self):
@@ -25,11 +27,14 @@ class KnowledgeBaseFacade:
         )
         self.uniprot = UniProtSource()
         self.ncbi = NcbiSource()
-        self._cache = {}
         self._cache_lock = threading.Lock()
 
         self._ensure_table()
 
+        self._queue = Queue()
+        self._worker_thread = threading.Thread(target=self._worker_loop, daemon=True)
+        self._worker_thread.start()
+        print("[QUEUE] Worker thread started")
     def _ensure_table(self):
         with self.conn.cursor() as cur:
             cur.execute("""
@@ -56,11 +61,25 @@ class KnowledgeBaseFacade:
             row = cur.fetchone()
             return row[0] if row else None
 
+    def _worker_loop(self):
+        while True:
+            try:
+                gene_symbol = self._queue.get(timeout=1)
+            except Empty:
+                continue
+
+            try:
+                print(f"[QUEUE] Processing gene: {gene_symbol}")
+                self._agentic_pipeline(gene_symbol)
+            except Exception as e:
+                print(f"[ERROR] Failed processing {gene_symbol}: {e}")
+            finally:
+                self._queue.task_done()
+
     def _agentic_pipeline(self, gene_symbol: str) -> str:
         start = time.perf_counter()
         key = int(hashlib.sha256(gene_symbol.encode()).hexdigest(), 16) % (2**31)
 
-        # ⚙️ создаём отдельное подключение для потока
         with psycopg2.connect(
                 host=os.environ["PG_HOST"],
                 port=os.environ.get("PG_PORT", 5432),
@@ -96,8 +115,6 @@ class KnowledgeBaseFacade:
                                 results[i] = "Agent timed out"
                             except Exception as e:
                                 results[i] = f"Agent failed: {e}"
-                            except SystemExit:
-                                results[i] = None
 
                     uniprot_output, kegg_output, opengenes_output, gnomad_output, ncbi_output = results
 
@@ -125,14 +142,13 @@ class KnowledgeBaseFacade:
                     cur.execute("SELECT pg_advisory_unlock(%s)", (key,))
 
         elapsed = time.perf_counter() - start
-        print(f"Generated article for {gene_symbol} in {elapsed:.2f}s")
+        print(f"[DONE] Generated article for {gene_symbol} in {elapsed:.2f}s")
         return article
 
     def search(self, gene_symbol: str) -> GeneResponse:
         gene_symbol = gene_symbol.strip().upper()
 
         with self._cache_lock:
-            # --- DB CHECK ---
             article = self._load_from_db(gene_symbol)
             if article:
                 try:
@@ -162,14 +178,13 @@ class KnowledgeBaseFacade:
                     externalLink=n.get("external_link") or u.get("external_link"),
                 )
 
-            print(f"[CACHE & DB MISS] {gene_symbol}")
-            threading.Thread(target=self._agentic_pipeline, args=(gene_symbol,), daemon=True).start()
+            print(f"[QUEUE ADD] Added {gene_symbol} to processing queue")
+            self._queue.put(gene_symbol)
 
             return GeneResponse(
                 gene=gene_symbol,
                 article=(
-                    "Your request has been received and is being processed. "
-                    "This may take up to one hour. Please check back later."
+                    "Your request has been received and is queued for processing. Please check back later."
                 ),
                 status="processing"
             )
