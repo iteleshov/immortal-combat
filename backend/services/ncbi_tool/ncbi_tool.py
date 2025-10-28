@@ -803,13 +803,13 @@ def get_element_attribute(element: ET.Element, tag: str, attribute: str) -> Opti
         return elem.get(attribute)
     return None
 
-def set_server_stdio(container_name="ncbi-tool"):
+def set_server_stdio(container_name="ncbi-mcp-server"):
     return StdioServerParameters(
         command="docker",
         args=[
             "exec", "-i",
             container_name,
-            "python", "-m", "mcp.server", "stdio"
+            "python", "-m", "ncbi_mcp_server.server", "stdio"
         ]
     )
 
