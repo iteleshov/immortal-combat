@@ -36,7 +36,7 @@ services:
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: opengenes
+      POSTGRES_DB: immortal_combat
       PGDATA: "/var/lib/postgresql/data/pgdata"
     ports:
       - "5432:5432"
