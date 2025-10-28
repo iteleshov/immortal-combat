@@ -98,10 +98,8 @@ export default function GeneResults({ gene }: GeneResultsProps) {
           <img src={logo} alt="GeneLens logo" className="w-10 h-10 object-contain rounded" />
           <div>
             <h2 className="text-2xl font-bold text-gray-900">{gene.gene}</h2>
-            {gene.synonyms.length > 0 && (
-              <p className="text-sm text-gray-600 mt-1">
-                Also known as: {gene.synonyms.join(', ')}
-              </p>
+            {gene.synonyms?.length > 0 && (
+              <p>Also known as: {gene.synonyms.join(', ')}</p>
             )}
           </div>
         </div>
@@ -163,11 +161,11 @@ export default function GeneResults({ gene }: GeneResultsProps) {
                 <p className="mt-1 text-sm text-gray-900">{gene.synonyms.join(', ') || 'None'}</p>
               </div>
             </div>
-            {gene.interval_in_protein_sequence && (
+            {gene.interval_in_dna_sequence && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Protein Sequence Interval</label>
+                <label className="block text-sm font-medium text-gray-700">DNA Sequence Interval</label>
                 <p className="mt-1 text-sm text-gray-900">
-                  Positions {gene.interval_in_protein_sequence[0]} - {gene.interval_in_protein_sequence[1]}
+                  Positions {gene.interval_in_dna_sequence[0]} - {gene.interval_in_dna_sequence[1]}
                 </p>
               </div>
             )}
@@ -235,7 +233,7 @@ export default function GeneResults({ gene }: GeneResultsProps) {
       </div>
 
       {/* Source */}
-      {gene.externalLink && (
+      {gene.externalLink && gene.externalLink.trim() !== '' && (
         <div>
           <SectionHeader title="Source" section="source" />
           {expandedSections.has('source') && (
