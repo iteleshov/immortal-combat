@@ -169,6 +169,19 @@ export default function GeneResults({ gene: initialGene }: GeneResultsProps) {
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeRaw]}
             className="text-sm sm:text-base leading-relaxed text-gray-900"
+            components={{
+              table: ({node, ...props}) => (
+                <div className="overflow-x-auto my-4">
+                  <table className="min-w-full border border-gray-300 text-sm">{props.children}</table>
+                </div>
+              ),
+              th: ({node, ...props}) => (
+                <th className="border border-gray-300 px-2 py-1 bg-gray-100 text-left text-gray-700">{props.children}</th>
+              ),
+              td: ({node, ...props}) => (
+                <td className="border border-gray-300 px-2 py-1 text-gray-800">{props.children}</td>
+              ),
+            }}
           >
             {gene.article}
           </ReactMarkdown>
