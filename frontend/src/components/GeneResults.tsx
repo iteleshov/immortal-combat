@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react'
-import { ChevronDown, ChevronRight, ExternalLink, FileText, Loader2 } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  FileText,
+  Loader2,
+  Share2,
+  Check
+} from 'lucide-react'
 import { GeneResponse } from '../types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -13,6 +21,7 @@ interface GeneResultsProps {
 export default function GeneResults({ gene: initialGene }: GeneResultsProps) {
   const [gene, setGene] = useState(initialGene)
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic', 'function']))
+  const [copied, setCopied] = useState(false)
 
   // ——— Poll every 60 seconds if still processing
   useEffect(() => {
@@ -39,6 +48,17 @@ export default function GeneResults({ gene: initialGene }: GeneResultsProps) {
       newExpanded.has(section) ? newExpanded.delete(section) : newExpanded.add(section)
       return newExpanded
     })
+  }
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/gene/${gene.gene}`
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy link:', err)
+    }
   }
 
   const SectionHeader = ({
@@ -138,28 +158,50 @@ export default function GeneResults({ gene: initialGene }: GeneResultsProps) {
           </div>
         </div>
 
-        <button
-          onClick={() => {
-            const blob = new Blob([gene.article ?? ''], { type: 'text/plain;charset=utf-8' })
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `${gene.gene}.md`
-            document.body.appendChild(a)
-            a.click()
-            document.body.removeChild(a)
-            URL.revokeObjectURL(url)
-          }}
-          className="inline-flex items-center justify-center w-full sm:w-auto px-3 py-2 border border-gray-300
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
+          <button
+            onClick={handleShare}
+            className="inline-flex items-center justify-center px-3 py-2 border border-gray-300
                      shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700
                      bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2
                      focus:ring-primary-500 cursor-pointer"
-          disabled={gene.status !== 'ready'}
-          hidden={gene.status !== 'ready'}
-        >
-          <FileText className="h-4 w-4 mr-2" />
-          Download
-        </button>
+          >
+            {copied ? (
+              <>
+                <Check className="h-4 w-4 mr-2 text-green-600" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Share2 className="h-4 w-4 mr-2" />
+                Copy link
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={() => {
+              const blob = new Blob([gene.article ?? ''], { type: 'text/plain;charset=utf-8' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `${gene.gene}.md`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              URL.revokeObjectURL(url)
+            }}
+            className="inline-flex items-center justify-center px-3 py-2 border border-gray-300
+                     shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700
+                     bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2
+                     focus:ring-primary-500 cursor-pointer"
+            disabled={gene.status !== 'ready'}
+            hidden={gene.status !== 'ready'}
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            Download
+          </button>
+        </div>
       </div>
 
       {/* Article content */}
