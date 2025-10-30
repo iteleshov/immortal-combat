@@ -10,15 +10,15 @@ import logo from '../assets/gene-lens-logo.png'
 export default function SearchPage() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const { geneParam } = useParams<{ geneParam?: string }>()
+  const { geneName } = useParams<{ geneName?: string }>()
   const { currentGene, loading, error, searchHistory } = useAppSelector(state => state.search)
   const [searchTerm, setSearchTerm] = useState('')
   const [validationError, setValidationError] = useState('')
 
   useEffect(() => {
-    if (!geneParam) return
+    if (!geneName) return
 
-    const preparedGeneName = geneParam.trim().toUpperCase()
+    const preparedGeneName = geneName.trim().toUpperCase()
     if (!preparedGeneName) return
 
     if (currentGene?.gene === preparedGeneName) {
@@ -36,7 +36,7 @@ export default function SearchPage() {
     setSearchTerm(preparedGeneName)
     dispatch(clearError())
     dispatch(fetchGene(preparedGeneName))
-  }, [geneParam])
+  }, [geneName])
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()

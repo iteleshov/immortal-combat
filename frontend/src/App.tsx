@@ -7,7 +7,7 @@ function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<SearchPage />} />
-        <Route path="/gene/:symbol" element={<SearchPage />} />
+        <Route path="/gene/:geneName" element={<SearchPage />} />
       </Routes>
     </Layout>
   )
