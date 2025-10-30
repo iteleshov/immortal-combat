@@ -13,6 +13,7 @@ export interface GeneResponse {
   contribution_of_evolution?: string;
   article?: string;
   externalLink?: string;
+  queue_size?: number
 }
 
 export interface ComparisonResponse {

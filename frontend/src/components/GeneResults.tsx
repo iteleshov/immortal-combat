@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, ExternalLink, FileText } from 'lucide-react'
-import { GeneResponse } from '../types'
+import { ChevronDown, ChevronRight, ExternalLink, FileText, Loader2 } from 'lucide-react'
+import { GeneResponse } from '@/types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
@@ -77,13 +77,25 @@ export default function GeneResults({ gene }: GeneResultsProps) {
   if (gene.status === 'processing') {
     return (
       <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Processing your request
-        </h2>
-        <p className="text-gray-600">
-          Your query for <strong>{gene.gene}</strong> is being processed.
-          This may take up to one hour. Please check back later.
-        </p>
+        <div className="flex flex-col items-center space-y-3">
+          <Loader2 className="h-8 w-8 text-primary-600 animate-spin" />
+          <h2 className="text-xl font-semibold text-gray-900">
+            Processing your request
+          </h2>
+          <p className="text-gray-600">
+            Your query for <strong>{gene.gene}</strong> is being processed.
+          </p>
+          <p className="text-gray-600">
+            Average processing time: <strong>up to 1 hour</strong>.
+          </p>
+
+          {gene.queue_size && gene.queue_size > 1 && (
+            <p className="text-sm text-gray-500 mt-2">
+              There are currently <strong>{gene.queue_size - 1}</strong> other
+              gene(s) in the queue ahead of yours.
+            </p>
+          )}
+        </div>
       </div>
     )
   }

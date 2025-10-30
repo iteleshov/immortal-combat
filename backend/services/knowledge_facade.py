@@ -188,3 +188,6 @@ class KnowledgeBaseFacade:
                 ),
                 status="processing"
             )
+
+    def get_queue_size(self) -> int:
+        return self._queue.qsize()

@@ -15,3 +15,4 @@ class GeneResponse(BaseModel):
     contribution_of_evolution: Optional[str] = None
     article: Optional[str] = None
     externalLink: Optional[str] = None
+    queue_size: Optional[int] = 0
