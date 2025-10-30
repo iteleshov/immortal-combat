@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronRight, ExternalLink, FileText, Loader2 } from 'lucide-react'
 import { GeneResponse } from '../types'
 import ReactMarkdown from 'react-markdown'
@@ -10,8 +10,28 @@ interface GeneResultsProps {
   gene: GeneResponse
 }
 
-export default function GeneResults({ gene }: GeneResultsProps) {
+export default function GeneResults({ gene: initialGene }: GeneResultsProps) {
+  const [gene, setGene] = useState(initialGene)
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic', 'function']))
+
+  // ——— Poll every 60 seconds if still processing
+  useEffect(() => {
+    if (gene.status !== 'processing') return
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/search?gene_name=${encodeURIComponent(gene.gene)}`)
+        if (res.ok) {
+          const updated = await res.json()
+          setGene(updated)
+        }
+      } catch (err) {
+        console.error('Polling failed:', err)
+      }
+    }, 60_000) // 1 минута
+
+    return () => clearInterval(interval)
+  }, [gene.status, gene.gene])
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => {
@@ -31,7 +51,6 @@ export default function GeneResults({ gene }: GeneResultsProps) {
     children?: React.ReactNode
   }) => {
     const isExpanded = expandedSections.has(section)
-
     return (
       <button
         onClick={() => toggleSection(section)}
@@ -104,10 +123,7 @@ export default function GeneResults({ gene }: GeneResultsProps) {
   }
 
   return (
-    <div
-      id="gene-results"
-      className="bg-white rounded-lg shadow-sm border overflow-hidden w-full"
-    >
+    <div id="gene-results" className="bg-white rounded-lg shadow-sm border overflow-hidden w-full">
       {/* Header */}
       <div className="p-4 sm:p-6 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-3 sm:space-x-4">
