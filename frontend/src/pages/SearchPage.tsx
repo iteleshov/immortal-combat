@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Search, Loader2, AlertCircle } from 'lucide-react'
 import { useAppSelector, useAppDispatch } from '../hooks'
 import { fetchGene, clearError } from '../store/searchSlice'
@@ -8,10 +9,34 @@ import logo from '../assets/gene-lens-logo.png'
 
 export default function SearchPage() {
   const dispatch = useAppDispatch()
-  const { currentGene, loading, error, searchHistory } =
-    useAppSelector(state => state.search)
+  const navigate = useNavigate()
+  const { geneParam } = useParams<{ geneParam?: string }>()
+  const { currentGene, loading, error, searchHistory } = useAppSelector(state => state.search)
   const [searchTerm, setSearchTerm] = useState('')
   const [validationError, setValidationError] = useState('')
+
+  useEffect(() => {
+    if (!geneParam) return
+
+    const preparedGeneName = geneParam.trim().toUpperCase()
+    if (!preparedGeneName) return
+
+    if (currentGene?.gene === preparedGeneName) {
+      setSearchTerm(preparedGeneName)
+      return
+    }
+
+    if (!validateGeneName(preparedGeneName)) {
+      setValidationError('Invalid gene name format in URL.')
+      setSearchTerm(preparedGeneName)
+      return
+    }
+
+    setValidationError('')
+    setSearchTerm(preparedGeneName)
+    dispatch(clearError())
+    dispatch(fetchGene(preparedGeneName))
+  }, [geneParam])
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,11 +53,15 @@ export default function SearchPage() {
 
     setValidationError('')
     dispatch(clearError())
-    dispatch(fetchGene(searchTerm.trim().toUpperCase()))
+
+    const upper = searchTerm.trim().toUpperCase()
+    navigate(`/gene/${encodeURIComponent(upper)}`, { replace: false })
+    dispatch(fetchGene(upper))
   }
 
   const handleHistoryClick = (gene: string) => {
     setSearchTerm(gene)
+    navigate(`/gene/${encodeURIComponent(gene)}`)
     dispatch(fetchGene(gene))
   }
 
