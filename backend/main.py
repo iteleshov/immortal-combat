@@ -24,5 +24,4 @@ facade = KnowledgeBaseFacade()
 @app.get('/search', response_model=GeneResponse)
 def search_gene(gene_name: str):
     result = facade.search(gene_name)
-    result.queue_size = facade.get_queue_size()
     return result

@@ -186,7 +186,8 @@ class KnowledgeBaseFacade:
                 article=(
                     "Your request has been received and is queued for processing. Please check back later."
                 ),
-                status="processing"
+                status="processing",
+                queue_size = self.get_queue_size()
             )
 
     def get_queue_size(self) -> int:

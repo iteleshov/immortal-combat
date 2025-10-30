@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 
 class GeneResponse(BaseModel):
     gene: str
+    status: str
     function: Optional[str] = None
     synonyms: List[str] = []
     longevity_association: Optional[str] = None
