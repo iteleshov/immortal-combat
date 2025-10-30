@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Search, Loader2, AlertCircle } from 'lucide-react'
-import { useAppSelector, useAppDispatch } from '@/hooks'
+import { useAppSelector, useAppDispatch } from '../hooks'
 import { fetchGene, clearError } from '../store/searchSlice'
 import { validateGeneName } from '../services/api'
 import GeneResults from '../components/GeneResults'

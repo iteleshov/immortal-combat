@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, ExternalLink, FileText, Loader2 } from 'lucide-react'
-import { GeneResponse } from '@/types'
+import { GeneResponse } from '../types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
