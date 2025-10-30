@@ -44,3 +44,14 @@ jobs:
           echo "Deploying the frontend image..."
           ssh ubuntu@$SERVER "docker compose up -d frontend --force-recreate"    
 
+      - name: Clean old Docker images
+        run: |
+          echo "Cleaning old Docker images..."
+          images=$(docker images ghcr.io/iteleshov/frontend --format '{{.ID}}' | tail -n +4)
+          if [ -n "$images" ]; then
+            docker rmi $images
+            echo "Removed old images:"
+            echo "$images"
+          else
+            echo "Nothing to remove."
+          fi
