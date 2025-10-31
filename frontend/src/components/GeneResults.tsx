@@ -23,6 +23,10 @@ export default function GeneResults({ gene: initialGene }: GeneResultsProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic', 'function']))
   const [copied, setCopied] = useState(false)
 
+  useEffect(() => {
+    setGene(initialGene)
+  }, [initialGene])
+
   // ——— Poll every 60 seconds if still processing
   useEffect(() => {
     if (gene.status !== 'processing') return
