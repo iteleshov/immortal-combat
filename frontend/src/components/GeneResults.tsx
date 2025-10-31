@@ -33,7 +33,7 @@ export default function GeneResults({ gene: initialGene }: GeneResultsProps) {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`/search?gene_name=${encodeURIComponent(gene.gene)}`)
+        const res = await fetch(`/api/search?gene_name=${encodeURIComponent(gene.gene)}`)
         if (res.ok) {
           const updated = await res.json()
           setGene(updated)
@@ -41,7 +41,7 @@ export default function GeneResults({ gene: initialGene }: GeneResultsProps) {
       } catch (err) {
         console.error('Polling failed:', err)
       }
-    }, 60_000) // 1 минута
+    }, 60_000) // 1 minute
 
     return () => clearInterval(interval)
   }, [gene.status, gene.gene])
