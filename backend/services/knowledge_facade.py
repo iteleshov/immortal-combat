@@ -166,6 +166,7 @@ class KnowledgeBaseFacade:
                 print(f"[DB HIT] {gene_symbol}")
                 return GeneResponse(
                     gene=gene_symbol,
+                    primaryAccession=u.get("primaryAccession"),
                     article=article,
                     status="ready",
                     function=u.get("function"),

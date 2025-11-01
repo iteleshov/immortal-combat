@@ -1,5 +1,6 @@
 export interface GeneResponse {
   gene: string;
+  primaryAccession: string;
   status: string | 'ready' | 'processing';
   function?: string;
   synonyms: string[];

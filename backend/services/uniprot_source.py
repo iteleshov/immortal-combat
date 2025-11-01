@@ -10,12 +10,20 @@ class UniProtSource:
     def fetch(self, gene_symbol: str) -> dict:
         params = {'query': f'gene:{gene_symbol} AND organism_id:9606', 'format': 'json', 'size': 1}
         res = self.client.get(self.SEARCH_URL, params=params)
-        out = {'protein_sequence': None, 'function': None, 'synonyms': [], 'modification_effects': None, 'article': None, 'contribution_of_evolution': None}
+        out = {'protein_sequence': None,
+               'function': None,
+               'synonyms': [],
+               'modification_effects': None,
+               'article': None,
+               'contribution_of_evolution': None,
+               'primaryAccession': None
+        }
         hits = res.get('results', []) if isinstance(res, dict) else []
         if not hits:
             return out
         entry = hits[0]
         accession = entry.get('primaryAccession') or entry.get('uniProtkbId')
+        out['primaryAccession'] = accession
         if not accession:
             return out
         full = self.client.get(self.ENTRY_URL.format(accession))

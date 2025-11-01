@@ -8,6 +8,7 @@ app = FastAPI(title="Longevity Gene Knowledge API (UniProt + NCBI)")
 origins = [
     "https://www.gene-lens.site",
     "https://gene-lens.site",
+    "http://localhost:3000"
 ]
 
 # ✅ Подключаем CORS middleware

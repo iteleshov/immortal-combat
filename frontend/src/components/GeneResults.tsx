@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   ChevronDown,
   ChevronRight,
@@ -13,6 +13,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import logo from '../assets/gene-lens-logo.png'
+import { ProteinViewer } from "../elements/ProteinViewer.tsx";
 
 interface GeneResultsProps {
   gene: GeneResponse
@@ -207,6 +208,15 @@ export default function GeneResults({ gene: initialGene }: GeneResultsProps) {
           </button>
         </div>
       </div>
+
+      {/* Gene 3D structure */}
+      {gene.primaryAccession && (
+        <div className="p-4 sm:p-6">
+          <ProteinViewer
+            pdbUrl={`https://alphafold.ebi.ac.uk/files/AF-${gene.primaryAccession}-F1-model_v6.pdb`}
+          />
+        </div>
+      )}
 
       {/* Article content */}
       <div className="p-4 sm:p-6">
