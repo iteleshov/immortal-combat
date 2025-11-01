@@ -12,15 +12,15 @@ export const ProteinViewer: React.FC<ProteinViewerProps> = ({
                                                               backgroundColor = "white",
                                                             }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [loading, setLoading] = useState(true);
   const stageRef = useRef<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
 
     const initStage = async () => {
-      // Очищаем контейнер и убиваем старую сцену
       if (stageRef.current) {
         try {
           stageRef.current.dispose();
@@ -28,11 +28,11 @@ export const ProteinViewer: React.FC<ProteinViewerProps> = ({
           console.warn("Stage dispose failed:", e);
         }
         stageRef.current = null;
-        containerRef.current.innerHTML = "";
+        container.innerHTML = "";
       }
 
       const { Stage } = await import("ngl");
-      const stage = new Stage(containerRef.current!, { backgroundColor });
+      const stage = new Stage(container, { backgroundColor });
       stageRef.current = stage;
 
       setLoading(true);
@@ -57,10 +57,11 @@ export const ProteinViewer: React.FC<ProteinViewerProps> = ({
       };
     };
 
-    initStage();
+    const cleanupPromise = initStage();
 
     return () => {
       isMounted = false;
+      cleanupPromise?.then?.((cleanupFn) => cleanupFn?.());
     };
   }, [pdbUrl, autoRotate, backgroundColor]);
 
