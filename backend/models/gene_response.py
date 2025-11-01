@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple
 
 class GeneResponse(BaseModel):
     gene: str
-    primaryAccession: str
+    primaryAccession: Optional[str] = None
     status: str
     function: Optional[str] = None
     synonyms: List[str] = []
