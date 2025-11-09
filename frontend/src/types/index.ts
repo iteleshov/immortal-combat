@@ -55,7 +55,7 @@ export interface ComparisonState {
 
 export interface UIState {
   sidebarOpen: boolean;
-  activeTab: 'search';
+  activeTab: 'search' | 'rag';
   theme: 'light';
 }
 

@@ -18,3 +18,4 @@ class GeneResponse(BaseModel):
     article: Optional[str] = None
     externalLink: Optional[str] = None
     queue_size: Optional[int] = 0
+

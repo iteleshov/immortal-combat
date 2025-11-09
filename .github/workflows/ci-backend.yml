@@ -51,7 +51,7 @@ jobs:
       - name: Clean old Docker images
         run: |
           echo "Cleaning old Docker images..."
-          images=$(docker images ghcr.io/iteleshov/backend --format '{{.ID}}' | tail -n +4)
+          images=$(docker images ghcr.io/iteleshov/backend --format '{{.ID}}' | tail -n +1)
           if [ -n "$images" ]; then
             docker rmi $images
             echo "Removed old images:"
