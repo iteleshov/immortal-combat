@@ -14,7 +14,7 @@ const uiSlice = createSlice({
     toggleSidebar: (state) => {
       state.sidebarOpen = !state.sidebarOpen
     },
-    setActiveTab: (state, action: PayloadAction<'search' | 'rag'>) => {
+    setActiveTab: (state, action: PayloadAction<'search'>) => {
       state.activeTab = action.payload
     },
     closeSidebar: (state) => {

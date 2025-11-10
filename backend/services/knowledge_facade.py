@@ -5,7 +5,6 @@ import threading
 from queue import Queue, Empty
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import psycopg2
-import pandas as pd
 
 from backend.services.aggregation import agg
 from backend.services.mcp_uniprot_source import uniprot
@@ -15,9 +14,7 @@ from backend.services.uniprot_source import UniProtSource
 from backend.services.ncbi_source import NcbiSource
 from backend.services.gnomad_source import gnomad
 from backend.services.ncbi_mcp_server import ncbi_mcp_server
-from backend.services.assistent.bio_assistent import bio_assistent, Article
 from backend.models.gene_response import GeneResponse
-from backend.models.rag_response import RagResponse
 
 class KnowledgeBaseFacade:
     def __init__(self):
@@ -31,29 +28,13 @@ class KnowledgeBaseFacade:
         self.uniprot = UniProtSource()
         self.ncbi = NcbiSource()
         self._cache_lock = threading.Lock()
-        self.bio_assistent = bio_assistent()
+
         self._ensure_table()
 
         self._queue = Queue()
         self._worker_thread = threading.Thread(target=self._worker_loop, daemon=True)
         self._worker_thread.start()
         print("[QUEUE] Worker thread started")
-
-    def add_articles_from_csv(self, parh):
-        df = pd.read_csv(parh)
-        articles = []
-        for row in df:
-            article = Article()
-            article.source = row["gene_symbol"]
-            article.content = row["article"]
-        self.bio_assistent.add_many_articles(articles)
-
-    def add_articles(self, articles):
-        self.bio_assistent.add_many_articles(articles)
-
-    def rag_search(self, issue):
-        return RagResponse(answer=self.bio_assistent.process_user_issue(issue))
-    
     def _ensure_table(self):
         with self.conn.cursor() as cur:
             cur.execute("""

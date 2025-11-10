@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Dna, Bot } from 'lucide-react'
+import { Menu, X, Dna } from 'lucide-react'
 import { useAppSelector, useAppDispatch } from '../hooks'
 import { toggleSidebar, setActiveTab, closeSidebar } from '../store/uiSlice'
 
@@ -15,7 +15,6 @@ export default function Layout({ children }: LayoutProps) {
 
   const navigation = [
     { name: 'Search', href: '/', icon: Dna, tab: 'search' as const },
-    {name: 'RAG Assistant', href: '/rag', icon: Bot, tab: 'rag' as const},
   ]
 
   // Enhance hover and focus states for navigation links
